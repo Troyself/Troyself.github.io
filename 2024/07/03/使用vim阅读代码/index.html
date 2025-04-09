@@ -1,0 +1,220 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>使用vim阅读代码 | TroyMitchell's blog</title><meta name="author" content="TroyMitchell"><meta name="copyright" content="TroyMitchell"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="环境 Ubuntu22.04 VIM - Vi IMproved 8.2 (2019 Dec 12, 编译于 May 03 2024 02:37:51)  引言在Linux环境下，Source Insight只能在Wine环境下运行，显得并没有那么好用，于是便有了本文，使用Vim+Ctags+Cscope来进行阅读代码。 安装安装Ctags打开终端，运行以下命令安装 ctags： sudo apt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用vim阅读代码">
+<meta property="og:url" content="https://blog.505218.xyz/2024/07/03/%E4%BD%BF%E7%94%A8vim%E9%98%85%E8%AF%BB%E4%BB%A3%E7%A0%81/index.html">
+<meta property="og:site_name" content="TroyMitchell&#39;s blog">
+<meta property="og:description" content="环境 Ubuntu22.04 VIM - Vi IMproved 8.2 (2019 Dec 12, 编译于 May 03 2024 02:37:51)  引言在Linux环境下，Source Insight只能在Wine环境下运行，显得并没有那么好用，于是便有了本文，使用Vim+Ctags+Cscope来进行阅读代码。 安装安装Ctags打开终端，运行以下命令安装 ctags： sudo apt">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/133468432?v=4">
+<meta property="article:published_time" content="2024-07-02T19:30:17.000Z">
+<meta property="article:modified_time" content="2024-08-07T09:09:39.115Z">
+<meta property="article:author" content="TroyMitchell">
+<meta property="article:tag" content="ubuntu">
+<meta property="article:tag" content="vim">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://avatars.githubusercontent.com/u/133468432?v=4"><link rel="shortcut icon" href="https://avatars.githubusercontent.com/u/133468432?v=4"><link rel="canonical" href="https://blog.505218.xyz/2024/07/03/%E4%BD%BF%E7%94%A8vim%E9%98%85%E8%AF%BB%E4%BB%A3%E7%A0%81/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":false,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '使用vim阅读代码',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-08-07 17:09:39'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.2.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">58</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/top_img.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="TroyMitchell's blog"><span class="site-name">TroyMitchell's blog</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">使用vim阅读代码</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-07-02T19:30:17.000Z" title="发表于 2024-07-03 03:30:17">2024-07-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-08-07T09:09:39.115Z" title="更新于 2024-08-07 17:09:39">2024-08-07</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="使用vim阅读代码"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><ul>
+<li>Ubuntu22.04</li>
+<li>VIM - Vi IMproved 8.2 (2019 Dec 12, 编译于 May 03 2024 02:37:51)</li>
+</ul>
+<h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>在<code>Linux</code>环境下，<code>Source Insight</code>只能在Wine环境下运行，显得并没有那么好用，于是便有了本文，使用<code>Vim+Ctags+Cscope</code>来进行阅读代码。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="安装Ctags"><a href="#安装Ctags" class="headerlink" title="安装Ctags"></a>安装Ctags</h3><p>打开终端，运行以下命令安装 <code>ctags</code>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt install exuberant-ctags</span><br></pre></td></tr></table></figure>
+
+<p>如果你希望使用 <code>universal-ctags</code>（这是一个更新和维护更积极的分支），则可以安装它：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt install universal-ctags</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装Cscope"><a href="#安装Cscope" class="headerlink" title="安装Cscope"></a>安装Cscope</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt install cscope</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置与使用"><a href="#配置与使用" class="headerlink" title="配置与使用"></a>配置与使用</h2><h3 id="配置Ctags"><a href="#配置Ctags" class="headerlink" title="配置Ctags"></a>配置Ctags</h3><p>在项目根目录执行如下命令生成<code>tags</code>文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ctags -R .  </span><br></pre></td></tr></table></figure>
+
+<p>可以发现在项目根目录下多了如下文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ <span class="built_in">ls</span> tags</span><br><span class="line">tags</span><br></pre></td></tr></table></figure>
+
+<p>为了能够在项目中使用该文件作为<code>tag</code>索引，则在<code>~/.vimrc</code>中增加如下配置，这个配置的目的是为了能够让<code>vim</code>在项目的任意目录中都能够找到<code>tags</code>的配置：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">set</span> tags=./tags;/</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用Ctags"><a href="#使用Ctags" class="headerlink" title="使用Ctags"></a>使用Ctags</h3><ul>
+<li><code>ctrl+t </code>:在跳转之后，按下ctrl+t,vim就会返回之前的跳转位置</li>
+<li><code>ctrl+] </code>:将光标移动到函数或变量名上，按下ctrl+],vim会自动跳转到该函数或者变量的定义处</li>
+<li><code>ctrl + w + ctrl + ]</code>: 将光标移动到函数或变量名上，按下快捷键,vim会自动跳转到该函数或者变量的定义处并垂直拆分标签页</li>
+<li><code>ctrl +w +w</code>: 在刚才垂直拆分的标签页中来回跳转光标</li>
+<li><code>ctrl + w + c</code>: 关闭一个垂直拆分的标签页</li>
+<li><code>:tags </code>: 输入:tags, vim会显示所有可跳转的列表</li>
+</ul>
+<h3 id="配置Cscope"><a href="#配置Cscope" class="headerlink" title="配置Cscope"></a>配置Cscope</h3><p>在项目根目录执行如下命令生成<code>tags</code>文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cscope -Rbq</span><br></pre></td></tr></table></figure>
+
+<p>可以发现在项目根目录下多了如下文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ <span class="built_in">ls</span> cscope*</span><br><span class="line">cscope.in.out  cscope.out  cscope.po.out</span><br></pre></td></tr></table></figure>
+
+
+<p>为了能够在项目中使用这些文件作为索引，则在下载<code>cscope</code>的官方配置文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget -O ~/.cscope_maps.vim https://cscope.sourceforge.net/cscope_maps.vim</span><br></pre></td></tr></table></figure>
+
+<p>并且在<code>.vimrc</code>中增加配置：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">source</span> ~/.cscope_maps.vim</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用Cscope"><a href="#使用Cscope" class="headerlink" title="使用Cscope"></a>使用Cscope</h3><p>在<code>vim</code>中光标放到一个<code>symbol</code>上，随后使用<code>vim</code>中配置的快捷键（details: ~&#x2F;.cscope_maps.vim）。</p>
+<ul>
+<li>a: 查找一个符合被赋值(assigned)的地方</li>
+<li>c: 查找调用(call)这个函数的函数</li>
+<li>d: 查找被这个函数调用(called)的函数</li>
+<li>e: 使用(egrep)搜索进行查找</li>
+<li>f: 按照文件(file)名查找</li>
+<li>g: 查找一个符合的全局(global)定义</li>
+<li>i: 查找包含(include)这个文件的文件</li>
+<li>s: 查找一个符合(symbol)的引用</li>
+<li>t: 查找这个文本(text)字符串的所有出现位置</li>
+</ul>
+<p>e.g.: <code>ctrl + \ + c</code>: 搜索光标处的<code>symbol</code>在工程中被谁调用了。</p>
+<h2 id="创建脚本"><a href="#创建脚本" class="headerlink" title="创建脚本"></a>创建脚本</h2><p>为了每次创建<code>cscope</code>和<code>ctag</code>索引的方便快捷性，可以在<code>/usr/local/bin</code>目录下创建一个名为<code>ctcs</code>的脚本，脚本内容如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ctcs</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">star</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">    ctags -R *   </span><br><span class="line">    <span class="keyword">if</span> [ $? -eq 0 ]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;ctags successfully!&quot;</span></span><br><span class="line">    <span class="keyword">fi</span>  </span><br><span class="line">    cscope -qbR </span><br><span class="line">    <span class="keyword">if</span> [ $? -eq 0 ]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;cscope successfully!&quot;</span></span><br><span class="line">    <span class="keyword">fi</span>  </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">del</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> [ -f tags -o -f cscope.out -o -f cscope.po.out -o -f cscope.in.out ]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">rm</span> -f tags  &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;clean tags ok!&quot;</span></span><br><span class="line">        <span class="built_in">rm</span> -f cscope.* &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;clean cscope.* files ok!&quot;</span></span><br><span class="line">    <span class="keyword">fi</span>  </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> <span class="string">&quot;<span class="variable">$1</span>&quot;</span> <span class="keyword">in</span></span><br><span class="line">    -r) </span><br><span class="line">        del </span><br><span class="line">        star</span><br><span class="line">        ;;  </span><br><span class="line">    -d) </span><br><span class="line">        del </span><br><span class="line">        ;;  </span><br><span class="line">    *)  </span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;usage : ctcs -r|-d&quot;</span>   </span><br><span class="line">        <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">esac</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">exit</span> 0</span><br></pre></td></tr></table></figure>
+
+<p>随后使用如下命令赋予执行权限：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">chmod</span> +x /usr/local/bin/ctcs</span><br></pre></td></tr></table></figure>
+
+<h2 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h2><p><a target="_blank" rel="noopener" href="https://cscope.sourceforge.net/cscope_maps.vim">https://cscope.sourceforge.net/cscope_maps.vim</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/563616/vim-and-ctags-tips-and-tricks">https://stackoverflow.com/questions/563616/vim-and-ctags-tips-and-tricks</a><br><a target="_blank" rel="noopener" href="https://bigeast.github.io/Source_Code_Tree_Navigation_in_Vim.html">https://bigeast.github.io/Source_Code_Tree_Navigation_in_Vim.html</a><br><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000044591252">https://segmentfault.com/a/1190000044591252</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/zg_hover/article/details/78917921">https://blog.csdn.net/zg_hover/article/details/78917921</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://blog.505218.xyz">TroyMitchell</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.505218.xyz/2024/07/03/%E4%BD%BF%E7%94%A8vim%E9%98%85%E8%AF%BB%E4%BB%A3%E7%A0%81/">https://blog.505218.xyz/2024/07/03/%E4%BD%BF%E7%94%A8vim%E9%98%85%E8%AF%BB%E4%BB%A3%E7%A0%81/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blog.505218.xyz" target="_blank">TroyMitchell's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/ubuntu/">ubuntu</a><a class="post-meta__tags" href="/tags/vim/">vim</a></div><div class="post_share"><div class="social-share" data-image="https://avatars.githubusercontent.com/u/133468432?v=4" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/07/03/vim%E5%BF%AB%E6%8D%B7%E6%93%8D%E4%BD%9C/" title="vim快捷操作"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">vim快捷操作</div></div></a></div><div class="next-post pull-right"><a href="/2024/07/01/%E5%9F%BA%E4%BA%8ECloudFlare%E6%90%AD%E5%BB%BADocker%E9%95%9C%E5%83%8F-1/" title="基于CloudFlare搭建Docker镜像"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">基于CloudFlare搭建Docker镜像</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/08/12/Linux%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/" title="Linux服务器搭建nfs服务(转)"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-12</div><div class="title">Linux服务器搭建nfs服务(转)</div></div></a></div><div><a href="/2024/08/12/Linux%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AEssh%E5%AF%86%E9%92%A5%E7%99%BB%E5%BD%95/" title="Linux服务器配置ssh密钥登录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-12</div><div class="title">Linux服务器配置ssh密钥登录</div></div></a></div><div><a href="/2024/07/24/Ubuntu22-04%E5%A4%9A%E5%B1%8F%E9%97%AA%E7%83%81%E9%97%AE%E9%A2%98/" title="Ubuntu22.04多屏闪烁问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-24</div><div class="title">Ubuntu22.04多屏闪烁问题</div></div></a></div><div><a href="/2024/09/13/Linux%E5%88%86%E5%8C%BA%E6%81%A2%E5%A4%8D/" title="Linux分区恢复"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-09-13</div><div class="title">Linux分区恢复</div></div></a></div><div><a href="/2024/08/20/Ubuntu22-04-%E8%87%AA%E5%B8%A6%E8%BE%93%E5%85%A5%E6%B3%95%E5%8D%A1%E6%AD%BB%E9%97%AE%E9%A2%98/" title="Ubuntu22.04 自带输入法卡死问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-20</div><div class="title">Ubuntu22.04 自带输入法卡死问题</div></div></a></div><div><a href="/2024/09/12/Ubuntu%E4%BD%BF%E7%94%A8%E5%91%BD%E4%BB%A4%E8%A1%8C%E4%BF%AE%E6%94%B9%E5%88%86%E8%BE%A8%E7%8E%87/" title="Ubuntu使用命令行修改分辨率"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-09-12</div><div class="title">Ubuntu使用命令行修改分辨率</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">TroyMitchell</div><div class="author-info__description">对弈平凡</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">58</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/TroyMitchell911"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">Words are cheap, I do.</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83"><span class="toc-number">1.</span> <span class="toc-text">环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-number">2.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85"><span class="toc-number">3.</span> <span class="toc-text">安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85Ctags"><span class="toc-number">3.1.</span> <span class="toc-text">安装Ctags</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85Cscope"><span class="toc-number">3.2.</span> <span class="toc-text">安装Cscope</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E4%B8%8E%E4%BD%BF%E7%94%A8"><span class="toc-number">4.</span> <span class="toc-text">配置与使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AECtags"><span class="toc-number">4.1.</span> <span class="toc-text">配置Ctags</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8Ctags"><span class="toc-number">4.2.</span> <span class="toc-text">使用Ctags</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AECscope"><span class="toc-number">4.3.</span> <span class="toc-text">配置Cscope</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8Cscope"><span class="toc-number">4.4.</span> <span class="toc-text">使用Cscope</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E8%84%9A%E6%9C%AC"><span class="toc-number">5.</span> <span class="toc-text">创建脚本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Ref"><span class="toc-number">6.</span> <span class="toc-text">Ref</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/01/05/linux%E6%8C%82%E8%BD%BDnfs%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%A4%B1%E8%B4%A5/" title="linux挂载nfs根文件系统失败">linux挂载nfs根文件系统失败</a><time datetime="2025-01-04T21:54:56.000Z" title="发表于 2025-01-05 05:54:56">2025-01-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/11/30/tmux%E5%A4%8D%E5%88%B6%E5%88%B0%E7%B3%BB%E7%BB%9F%E5%89%AA%E5%88%87%E6%9D%BF/" title="tmux复制到系统剪切板">tmux复制到系统剪切板</a><time datetime="2024-11-30T12:14:39.000Z" title="发表于 2024-11-30 20:14:39">2024-11-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/11/30/lazyvim%E5%A4%8D%E5%88%B6%E5%88%B0%E5%89%AA%E5%88%87%E6%9D%BF/" title="lazyvim复制到剪切板">lazyvim复制到剪切板</a><time datetime="2024-11-30T12:07:41.000Z" title="发表于 2024-11-30 20:07:41">2024-11-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/11/30/ssh%E5%8F%8C%E5%90%91%E5%A4%8D%E5%88%B6/" title="ssh双向复制">ssh双向复制</a><time datetime="2024-11-30T11:45:14.000Z" title="发表于 2024-11-30 19:45:14">2024-11-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/11/30/Linux%E5%91%BD%E4%BB%A4%E8%A1%8C%E8%BF%90%E8%A1%8Cclash-verge/" title="Linux命令行运行clash-verge">Linux命令行运行clash-verge</a><time datetime="2024-11-29T21:04:49.000Z" title="发表于 2024-11-30 05:04:49">2024-11-30</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2025 By TroyMitchell</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/canvas-nest.min.js"></script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/click-heart.min.js" async="async" mobile="true"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

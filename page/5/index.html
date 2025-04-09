@@ -1,0 +1,232 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>TroyMitchell's blog</title><meta name="author" content="TroyMitchell"><meta name="copyright" content="TroyMitchell"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="对弈平凡">
+<meta property="og:type" content="website">
+<meta property="og:title" content="TroyMitchell&#39;s blog">
+<meta property="og:url" content="https://blog.505218.xyz/page/5/index.html">
+<meta property="og:site_name" content="TroyMitchell&#39;s blog">
+<meta property="og:description" content="对弈平凡">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/133468432?v=4">
+<meta property="article:author" content="TroyMitchell">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://avatars.githubusercontent.com/u/133468432?v=4"><link rel="shortcut icon" href="https://avatars.githubusercontent.com/u/133468432?v=4"><link rel="canonical" href="https://blog.505218.xyz/page/5/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":false,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'TroyMitchell\'s blog',
+  isPost: false,
+  isHome: true,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2025-04-09 18:28:52'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.2.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">58</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="page" id="body-wrap"><header class="full_page" id="page-header" style="background-image: url('/img/top_img.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="TroyMitchell's blog"><span class="site-name">TroyMitchell's blog</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="site-info"><h1 id="site-title">TroyMitchell's blog</h1><div id="site-subtitle"><span id="subtitle"></span></div></div><div id="scroll-down"><i class="fas fa-angle-down scroll-down-effects"></i></div></header><main class="layout" id="content-inner"><div class="recent-posts" id="recent-posts"><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2024/08/09/esp32/" title="esp32初始化结构体问题">esp32初始化结构体问题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2024-08-09T07:39:13.921Z" title="发表于 2024-08-09 15:39:13">2024-08-09</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/mcu/">mcu</a><i class="fas fa-angle-right article-meta-link"></i><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/mcu/esp32/">esp32</a></span></div><div class="content">在c++使用espidf进行wifi连接时，发现如下代码可以连接：
+wifi_config_t wifi_config = &#123;            .sta = &#123;                    .ssid = &quot;HBDT-23F&quot;,                    .password = &quot;hbishbis&quot;            &#125;&#125;;
+但如下代码不可连接：
+wifi_config_t wifi_config;strcpy(wifi_config.sta.ssid, &quot;HBDT-23F&quot;);strcpy(wifi_config.sta.password, &quot;hbishbis&quot;);
+
+经过排查发现espidf对于连接阶段除了ssid和password还使用到了其他变量，所以应该清零结构体内存：
+wifi_config_t wifi_config&#123;&#125;;
+
+一个很低级的问题…记录下来时刻警醒。
+</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2024/08/08/rk3568%E4%B8%8D%E8%83%BD%E7%83%A7%E5%86%99%E9%97%AE%E9%A2%98/" title="rk3568不能烧写问题">rk3568不能烧写问题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2024-08-08T15:44:15.000Z" title="发表于 2024-08-08 23:44:15">2024-08-08</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/kernel/">kernel</a><i class="fas fa-angle-right article-meta-link"></i><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/kernel/rockchip/">rockchip</a></span></div><div class="content">烧写固件时被打断就会导致Loader和Maskrom模式都无法进入。
+此时将sd卡刷写一个update.img，就可以进入Maskrom模式，此时可向emmc烧写镜像。
+</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2024/08/08/esp32-system-api-Event-Loop-Library/" title="esp32-system-api: Event Loop Library">esp32-system-api: Event Loop Library</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2024-08-07T22:39:33.000Z" title="发表于 2024-08-08 06:39:33">2024-08-08</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/mcu/">mcu</a><i class="fas fa-angle-right article-meta-link"></i><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/mcu/esp32/">esp32</a></span></div><div class="content">Envesp-idf: v5.3-stable
+数据结构介绍事件处理函数当事件到达后，运行的函数名为事件处理函数。
+事件处理函数要在事件循环创建完成之后调用注册函数注册进入事件循环。
+事件处理函数定义如下：
+typedef void (*esp_event_handler_t)(void* event_handler_arg,                                    esp_event_base_t event_base,                                    int32_t event_id,                                    void* event_data); /**&lt; function called when an event is posted to the queue */
+
+事件循环句柄事件循环句柄的内存与值由API决定，用户并不参与，所以用户在创建事件循环句柄的时候应该创建为指针，调用esp_event_loop_create函数创建事件循环句柄，经该函数创建的事件循 ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2024/08/07/vim%E4%B8%AD%E6%96%87%E4%B9%B1%E7%A0%81/" title="vim中文乱码">vim中文乱码</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2024-08-07T14:39:40.000Z" title="发表于 2024-08-07 22:39:40">2024-08-07</time></span></div><div class="content">vim ~/.vimrc# 将以下内容加入：set termencoding=utf-8set encoding=utf8set fileencodings=utf8,ucs-bom,gbk,cp936,gb2312,gb18030
+</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2024/08/02/clion%E5%BC%80%E5%8F%91esp32/" title="clion开发esp32">clion开发esp32</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2024-08-01T19:35:24.000Z" title="发表于 2024-08-02 03:35:24">2024-08-02</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/mcu/">mcu</a><i class="fas fa-angle-right article-meta-link"></i><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/mcu/esp32/">esp32</a></span></div><div class="content">README本文基于文末的ref链接[Link1]搭建，这里作为一些补充记录。
+Chip: esp32c3
+System: Ubuntu 22.04
+安装idf出现错误在执行.install.sh时遇到如下错误：
+./install.shDetecting the Python interpreterChecking &quot;python3&quot; ...Python 3.10.12&quot;python3&quot; has been detectedChecking Python cref: nsa-esp-elf-gdb, riscv32-esp-elf-gdb, xtensa-esp-elf, riscv32-esp-elf, esp32ulp-elf, openocd-esp32, esp-rom-elfsSkipping xtensa-esp-elf-gdb@14.2_20240403 (already installed)Skipping riscv32-esp-elf-gdb@14.2_20240403 (already installed)Skipping  ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2024/08/02/rk3568%E7%A7%BB%E6%A4%8DopenHarmony/" title="rk3568移植openHarmony v3.2.3---环境准备">rk3568移植openHarmony v3.2.3---环境准备</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2024-08-01T16:30:28.000Z" title="发表于 2024-08-02 00:30:28">2024-08-02</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/kernel/">kernel</a><i class="fas fa-angle-right article-meta-link"></i><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/kernel/rockchip/">rockchip</a></span></div><div class="content">EnvSystem: Ubuntu 20.04
+Package安装编译所需要的软件包：
+sudo apt-get updatesudo apt-get install binutils git git-lfs gnupg flex bison gperf build-essential zlib1g-dev \gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev \ccache libgl1-mesa-dev libxml2-utils xsltproc unzip m4 bc gnutls-bin python3.8 python3-pip ruby \openjdk-8-jdk genext2fs libopencv-dev lz4 libssl-dev libncurses5 git-lfs lib32z1-dev zip curl# 如果libncurses5这个依赖没安装上，执行apt再次安装依赖sudo apt install libncurses5
+
+ ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2024/07/31/rk3568-sd-card%E6%97%A0%E6%B3%95%E6%A3%80%E6%B5%8B-1/" title="rk3568 sd card无法检测">rk3568 sd card无法检测</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2024-07-31T15:00:04.000Z" title="发表于 2024-07-31 23:00:04">2024-07-31</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/kernel/">kernel</a><i class="fas fa-angle-right article-meta-link"></i><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/kernel/rockchip/">rockchip</a></span></div><div class="content">配置好设备树节点后插入sd卡无法检测。
+设备树节点如下：
+&amp;sdmmc0 &#123;	bus-width = &lt;4&gt;;	cap-sd-highspeed;	cd-gpios = &lt;&amp;gpio0 RK_PA4 GPIO_ACTIVE_LOW&gt;;	disable-wp;	pinctrl-names = &quot;default&quot;;	pinctrl-0 = &lt;&amp;sdmmc0_bus4 &amp;sdmmc0_clk &amp;sdmmc0_cmd &amp;sdmmc0_det&gt;;	sd-uhs-sdr104;	vmmc-supply = &lt;&amp;vcc3v3_sd&gt;;	vqmmc-supply = &lt;&amp;vccio_sd&gt;;	status = &quot;okay&quot;;&#125;;
+
+查看内核日志发现如下报错：
+dmesg | grep mmc[   12.226496] dwmmc_rockchip fe2b0000.mmc: Looking up vmmc-supply ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2024/07/30/vim%E8%AE%BE%E7%BD%AE80%E8%A1%8C%E8%87%AA%E5%8A%A8%E6%8D%A2%E8%A1%8C/" title="vim设置80列自动换行">vim设置80列自动换行</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2024-07-30T14:12:06.000Z" title="发表于 2024-07-30 22:12:06">2024-07-30</time></span></div><div class="content">由于平常文件编辑并不需要该设置，但是commit的时候需要，所以记录一下：
+set tw=80</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2024/07/26/rk3568%E5%88%B7%E5%86%99openharmony3-2/" title="rk3568刷写openharmony3.2">rk3568刷写openharmony3.2</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2024-07-25T20:15:03.000Z" title="发表于 2024-07-26 04:15:03">2024-07-26</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/kernel/">kernel</a><i class="fas fa-angle-right article-meta-link"></i><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/kernel/rockchip/">rockchip</a></span></div><div class="content">sudo upgrade_tool di -p parameter.txtsudo upgrade_tool UL MiniLoaderAll.bin -noresetsudo upgrade_tool di -u uboot.img &amp;&amp; sudo upgrade_tool di -boot_linux boot_linux.img&amp;&amp; sudo upgrade_tool di -system system.img &amp;&amp; sudo upgrade_tool di -vendor vendor.img &amp;&amp; sudo upgrade_tool di -userdata userdata.img &amp;&amp; sudo upgrade_tool di -ramdisk ramdisk.img &amp;&amp; sudo upgrade_tool di -resource resource.img &amp;&amp; sudo upgrade_tool di -sys-prod sys_prod.img &amp ...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2024/07/24/Ubuntu22-04%E5%A4%9A%E5%B1%8F%E9%97%AA%E7%83%81%E9%97%AE%E9%A2%98/" title="Ubuntu22.04多屏闪烁问题">Ubuntu22.04多屏闪烁问题</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2024-07-24T11:44:16.000Z" title="发表于 2024-07-24 19:44:16">2024-07-24</time></span></div><div class="content">当电脑连接多个显示屏时，只要在副屏打字且光标没有悬浮在主屏幕，主屏幕就会白屏闪烁。
+后续发现只有在终端和文件夹出现这个问题，想到安装了Blur my shell这个extension，并且指定了这两个app为模糊，在这个extension里面删掉这两个app的配置即可解决。
+</div></div></div><nav id="pagination"><div class="pagination"><a class="extend prev" rel="prev" href="/page/4/#content-inner"><i class="fas fa-chevron-left fa-fw"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/#content-inner">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/#content-inner">6</a><a class="extend next" rel="next" href="/page/6/#content-inner"><i class="fas fa-chevron-right fa-fw"></i></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">TroyMitchell</div><div class="author-info__description">对弈平凡</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">58</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/TroyMitchell911"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">Words are cheap, I do.</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/01/05/linux%E6%8C%82%E8%BD%BDnfs%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%A4%B1%E8%B4%A5/" title="linux挂载nfs根文件系统失败">linux挂载nfs根文件系统失败</a><time datetime="2025-01-04T21:54:56.000Z" title="发表于 2025-01-05 05:54:56">2025-01-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/11/30/tmux%E5%A4%8D%E5%88%B6%E5%88%B0%E7%B3%BB%E7%BB%9F%E5%89%AA%E5%88%87%E6%9D%BF/" title="tmux复制到系统剪切板">tmux复制到系统剪切板</a><time datetime="2024-11-30T12:14:39.000Z" title="发表于 2024-11-30 20:14:39">2024-11-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/11/30/lazyvim%E5%A4%8D%E5%88%B6%E5%88%B0%E5%89%AA%E5%88%87%E6%9D%BF/" title="lazyvim复制到剪切板">lazyvim复制到剪切板</a><time datetime="2024-11-30T12:07:41.000Z" title="发表于 2024-11-30 20:07:41">2024-11-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/11/30/ssh%E5%8F%8C%E5%90%91%E5%A4%8D%E5%88%B6/" title="ssh双向复制">ssh双向复制</a><time datetime="2024-11-30T11:45:14.000Z" title="发表于 2024-11-30 19:45:14">2024-11-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/11/30/Linux%E5%91%BD%E4%BB%A4%E8%A1%8C%E8%BF%90%E8%A1%8Cclash-verge/" title="Linux命令行运行clash-verge">Linux命令行运行clash-verge</a><time datetime="2024-11-29T21:04:49.000Z" title="发表于 2024-11-30 05:04:49">2024-11-30</time></div></div></div></div><div class="card-widget card-categories"><div class="item-headline">
+            <i class="fas fa-folder-open"></i>
+            <span>分类</span>
+            <a class="card-more-btn" href="/categories/" title="查看更多">
+    <i class="fas fa-angle-right"></i></a>
+            </div>
+            <ul class="card-category-list" id="aside-cat-list">
+            <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/asm/"><span class="card-category-list-name">asm</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/home-assistant/"><span class="card-category-list-name">home-assistant</span><span class="card-category-list-count">2</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/kernel/"><span class="card-category-list-name">kernel</span><span class="card-category-list-count">20</span></a><ul class="card-category-list child"><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/kernel/network/"><span class="card-category-list-name">network</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/kernel/reverse/"><span class="card-category-list-name">reverse</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/kernel/rockchip/"><span class="card-category-list-name">rockchip</span><span class="card-category-list-count">13</span></a></li></ul></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/mcu/"><span class="card-category-list-name">mcu</span><span class="card-category-list-count">3</span></a><ul class="card-category-list child"><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/mcu/esp32/"><span class="card-category-list-name">esp32</span><span class="card-category-list-count">3</span></a></li></ul></li>
+            </ul></div><div class="card-widget card-tags"><div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div><div class="card-tag-cloud"><a href="/tags/linux/" style="font-size: 1.5em; color: #99a9bf">linux</a> <a href="/tags/a33/" style="font-size: 1.1em; color: #999">a33</a> <a href="/tags/docker/" style="font-size: 1.15em; color: #999b9e">docker</a> <a href="/tags/rk3566/" style="font-size: 1.1em; color: #999">rk3566</a> <a href="/tags/esp32/" style="font-size: 1.2em; color: #999da3">esp32</a> <a href="/tags/home-assistant/" style="font-size: 1.2em; color: #999da3">home-assistant</a> <a href="/tags/rk3568/" style="font-size: 1.4em; color: #99a5b6">rk3568</a> <a href="/tags/mcu/" style="font-size: 1.2em; color: #999da3">mcu</a> <a href="/tags/allwinner/" style="font-size: 1.1em; color: #999">allwinner</a> <a href="/tags/uboot/" style="font-size: 1.1em; color: #999">uboot</a> <a href="/tags/serial/" style="font-size: 1.1em; color: #999">serial</a> <a href="/tags/network/" style="font-size: 1.1em; color: #999">network</a> <a href="/tags/vim/" style="font-size: 1.25em; color: #999fa7">vim</a> <a href="/tags/ubuntu/" style="font-size: 1.45em; color: #99a7ba">ubuntu</a> <a href="/tags/openHarmony/" style="font-size: 1.3em; color: #99a1ac">openHarmony</a> <a href="/tags/tmux/" style="font-size: 1.1em; color: #999">tmux</a> <a href="/tags/kernel/" style="font-size: 1.45em; color: #99a7ba">kernel</a> <a href="/tags/hack/" style="font-size: 1.1em; color: #999">hack</a> <a href="/tags/rockchip/" style="font-size: 1.35em; color: #99a3b1">rockchip</a></div></div><div class="card-widget card-archives"><div class="item-headline"><i class="fas fa-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2025/01/"><span class="card-archive-list-date">一月 2025</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/11/"><span class="card-archive-list-date">十一月 2024</span><span class="card-archive-list-count">7</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/10/"><span class="card-archive-list-date">十月 2024</span><span class="card-archive-list-count">4</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/09/"><span class="card-archive-list-date">九月 2024</span><span class="card-archive-list-count">11</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/08/"><span class="card-archive-list-date">八月 2024</span><span class="card-archive-list-count">23</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/07/"><span class="card-archive-list-date">七月 2024</span><span class="card-archive-list-count">12</span></a></li></ul></div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站资讯</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">58</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">本站总访问量 :</div><div class="item-count" id="busuanzi_value_site_pv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2025-04-09T10:28:51.848Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2025 By TroyMitchell</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"><script>window.typedJSFn = {
+  init: (str) => {
+    window.typed = new Typed('#subtitle', Object.assign({
+      strings: str,
+      startDelay: 300,
+      typeSpeed: 150,
+      loop: true,
+      backSpeed: 50,
+    }, null))
+  },
+  run: (subtitleType) => {
+    if (true) {
+      if (typeof Typed === 'function') {
+        subtitleType()
+      } else {
+        getScript('https://cdn.jsdelivr.net/npm/typed.js@2.1.0/dist/typed.umd.min.js').then(subtitleType)
+      }
+    } else {
+      subtitleType()
+    }
+  }
+}
+</script><script>function subtitleType () {
+  fetch('https://v1.hitokoto.cn')
+    .then(response => response.json())
+    .then(data => {
+      if (true) {
+        const from = '出自 ' + data.from
+        const sub = ["BTW, BE HAPPY."]
+        sub.unshift(data.hitokoto, from)
+        typedJSFn.init(sub)
+      } else {
+        document.getElementById('subtitle').textContent = data.hitokoto
+      }
+    })
+}
+typedJSFn.run(subtitleType)
+</script></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/canvas-nest.min.js"></script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/click-heart.min.js" async="async" mobile="true"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
