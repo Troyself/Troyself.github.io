@@ -4,6 +4,19 @@
   
     
     <entry>
+      <title>elf文件[0]-section和segment的区别</title>
+      <link href="/2025/04/13/elf%E6%96%87%E4%BB%B6-0-section%E5%92%8Csegment%E7%9A%84%E5%8C%BA%E5%88%AB/"/>
+      <url>/2025/04/13/elf%E6%96%87%E4%BB%B6-0-section%E5%92%8Csegment%E7%9A%84%E5%8C%BA%E5%88%AB/</url>
+      
+        <content type="html"><![CDATA[<p>系列:</p><ul class="series-items"><li><a href="/2025/04/13/elf%E6%96%87%E4%BB%B6-0-section%E5%92%8Csegment%E7%9A%84%E5%8C%BA%E5%88%AB/" title="elf文件[0]-section和segment的区别">elf文件[0]-section和segment的区别</a></li></ul><p>Section 是给链接器和调试器看的，Segment 是给程序加载器（比如内核、bootloader）加载用的。</p><h2 id="具体区别"><a href="#具体区别" class="headerlink" title="具体区别"></a>具体区别</h2><table><thead><tr><th>对比项</th><th>Section（段）</th><th>Segment（程序段）</th></tr></thead><tbody><tr><td>来自哪儿</td><td><strong>Section Header Table</strong>（由 <code>shoff</code> 定位）</td><td><strong>Program Header Table</strong>（由 <code>phoff</code> 定位）</td></tr><tr><td>用途</td><td>给 <strong>链接器</strong>、<strong>调试器</strong> 用</td><td>给 <strong>加载器（如 exec）</strong> 用</td></tr><tr><td>是否加载进内存</td><td>不一定，比如 <code>.symtab</code>、<code>.strtab</code> 等只调试用</td><td>是的，<code>PT_LOAD</code> 类型会加载进内存</td></tr><tr><td>典型内容</td><td><code>.text</code>, <code>.data</code>, <code>.bss</code>, <code>.rodata</code> 等</td><td>一个 Segment 可能包含多个 Section</td></tr><tr><td>是否可选</td><td>可选（<code>strip</code> 可移除）</td><td>必须存在，运行离不开它</td></tr><tr><td>ELF 文件结构中</td><td>在 <strong>Section Header Table</strong> 描述</td><td>在 <strong>Program Header Table</strong> 描述</td></tr></tbody></table><h2 id="类比理解"><a href="#类比理解" class="headerlink" title="类比理解"></a>类比理解</h2><p>假设你在打包东西出门旅行：</p><ul><li><strong>Section（段）</strong>：像你家衣柜里的“衣服”“裤子”“电器”“洗漱包”这些分类，存储和组织方便，归类清晰（链接器喜欢）。</li><li><strong>Segment（程序段）</strong>：像你把这些打包进行李箱的“格子”，有的格子是专门放衣服的，有的是放易碎品的（加载器关心怎么加载进“内存”）。</li></ul><h2 id="举个例子"><a href="#举个例子" class="headerlink" title="举个例子"></a>举个例子</h2><p>你的 ELF 文件里有这些 Section：</p><ul><li><code>.text</code> — 代码段</li><li><code>.data</code> — 初始化数据</li><li><code>.bss</code> — 未初始化数据</li><li><code>.rodata</code> — 常量数据</li></ul><p>它们可能会被合并进两个 Segment：</p><ul><li>一个只读的 segment：包含 <code>.text</code> + <code>.rodata</code></li><li>一个读写的 segment：包含 <code>.data</code> + <code>.bss</code></li></ul><h2 id="为什么要合并"><a href="#为什么要合并" class="headerlink" title="为什么要合并"></a>为什么要合并</h2><p>为了页对齐、简化加载和权限控制。</p><h3 id="页对齐"><a href="#页对齐" class="headerlink" title="页对齐"></a>页对齐</h3><ul><li><p>Segment 通常按页对齐（如 0x1000），以便于映射和访问。</p></li><li><p>Section 之间未必页对齐，把它们分别搞成 Segment 会浪费内存（碎片）。</p></li><li><p>合并后可以使用<strong>连续的物理页</strong>映射，简化内存管理，提高性能。</p></li></ul><h3 id="简化加载"><a href="#简化加载" class="headerlink" title="简化加载"></a>简化加载</h3><p>如果每个 Section 都创建一个 Segment，程序加载会非常复杂、低效（更多系统调用、更多内存碎片）。Segment 数量少，加载效率高，<code>exec</code> 调用成本低</p><h3 id="权限控制"><a href="#权限控制" class="headerlink" title="权限控制"></a>权限控制</h3><p>操作系统通常以「页」为单位管理内存（一般是 4KB）。每个 Segment 会映射到一段虚拟地址空间，并设置相应权限。</p><p>比如：</p><table><thead><tr><th>Segment 内容</th><th>权限</th><th>包含的 Section</th></tr></thead><tbody><tr><td>代码段（只读可执行）</td><td>R-X</td><td><code>.text</code>, <code>.rodata</code></td></tr><tr><td>数据段（读写不可执行）</td><td>RW-</td><td><code>.data</code>, <code>.bss</code></td></tr></tbody></table><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><code>Section</code> 是“编译器 &#x2F; 链接器 &#x2F; 调试器”的视角（逻辑结构）</p><p><code>Segment</code> 是“加载器 &#x2F; 内核”的视角（运行时布局）</p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>linux i2c驱动框架分析[1]</title>
       <link href="/2025/04/13/linux-i2c%E9%A9%B1%E5%8A%A8%E6%A1%86%E6%9E%B6%E5%88%86%E6%9E%90-1/"/>
       <url>/2025/04/13/linux-i2c%E9%A9%B1%E5%8A%A8%E6%A1%86%E6%9E%B6%E5%88%86%E6%9E%90-1/</url>
