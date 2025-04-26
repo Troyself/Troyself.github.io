@@ -4,6 +4,29 @@
   
     
     <entry>
+      <title>Uboot如何传递bootargs给Linux</title>
+      <link href="/2025/04/26/Uboot%E5%A6%82%E4%BD%95%E4%BC%A0%E9%80%92bootargs%E7%BB%99Linux/"/>
+      <url>/2025/04/26/Uboot%E5%A6%82%E4%BD%95%E4%BC%A0%E9%80%92bootargs%E7%BB%99Linux/</url>
+      
+        <content type="html"><![CDATA[<h1 id="Uboot如何传递bootargs"><a href="#Uboot如何传递bootargs" class="headerlink" title="Uboot如何传递bootargs"></a>Uboot如何传递bootargs</h1><p>uboot并不是直接将bootargs传递给kernel，而是修改dts中的chosen节点实现的。</p><p>在uboot中可以发现该函数：</p><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">fdt_chosen</span><span class="params">(<span class="type">void</span> *fdt)</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">abuf</span> <span class="title">buf</span> =</span> &#123;&#125;;</span><br><span class="line"><span class="type">int</span>   nodeoffset;</span><br><span class="line"><span class="type">int</span>   err;</span><br><span class="line"><span class="type">const</span> <span class="type">char</span> *str;<span class="comment">/* used to set string properties */</span></span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"><span class="comment">/* find or create &quot;/chosen&quot; node. */</span></span><br><span class="line">nodeoffset = fdt_find_or_add_subnode(fdt, <span class="number">0</span>, <span class="string">&quot;chosen&quot;</span>);</span><br><span class="line"><span class="keyword">if</span> (nodeoffset &lt; <span class="number">0</span>)</span><br><span class="line"><span class="keyword">return</span> nodeoffset;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">str = board_fdt_chosen_bootargs(fdt_get_property(fdt, nodeoffset,</span><br><span class="line"> <span class="string">&quot;bootargs&quot;</span>, <span class="literal">NULL</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (str) &#123;</span><br><span class="line">err = fdt_setprop(fdt, nodeoffset, <span class="string">&quot;bootargs&quot;</span>, str,</span><br><span class="line">  <span class="built_in">strlen</span>(str) + <span class="number">1</span>);</span><br><span class="line"><span class="keyword">if</span> (err &lt; <span class="number">0</span>) &#123;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;WARNING: could not set bootargs %s.\n&quot;</span>,</span><br><span class="line">       fdt_strerror(err));</span><br><span class="line"><span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>就不用管这个函数是怎么被调用的了，反正一定是会被调用到的。</p><p>该函数使用<code>fdt_find_or_add_subnode</code>寻找chosen节点，如果没找到chosen节点，就创建一个，随后返回offset。</p><p>随后调用<code>board_fdt_chosen_bootargs</code>函数，该函数定义如下：</p><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * board_fdt_chosen_bootargs - boards may override this function to use</span></span><br><span class="line"><span class="comment"> *                             alternative kernel command line arguments</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">__weak <span class="type">const</span> <span class="type">char</span> *<span class="title function_">board_fdt_chosen_bootargs</span><span class="params">(<span class="type">const</span> <span class="keyword">struct</span> fdt_property *fdt_ba)</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">return</span> env_get(<span class="string">&quot;bootargs&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>该函数直接将环境变量中的<code>bootargs</code>返回，str被赋值为bootargs。</p><p>随后调用<code> fdt_setprop</code>去设置bootargs。</p><p>至此bootargs修改完毕。</p>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> linux </tag>
+            
+            <tag> kernel </tag>
+            
+            <tag> uboot </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Linux设备树[0]-理解dtb格式</title>
       <link href="/2025/04/26/Linux%E8%AE%BE%E5%A4%87%E6%A0%91-0-%E7%90%86%E8%A7%A3dtb%E6%A0%BC%E5%BC%8F/"/>
       <url>/2025/04/26/Linux%E8%AE%BE%E5%A4%87%E6%A0%91-0-%E7%90%86%E8%A7%A3dtb%E6%A0%BC%E5%BC%8F/</url>
@@ -949,9 +972,9 @@
             
             <tag> linux </tag>
             
-            <tag> kernel </tag>
-            
             <tag> openHarmony </tag>
+            
+            <tag> kernel </tag>
             
             <tag> rk3568 </tag>
             
@@ -982,9 +1005,9 @@
             
             <tag> linux </tag>
             
-            <tag> kernel </tag>
-            
             <tag> openHarmony </tag>
+            
+            <tag> kernel </tag>
             
             <tag> rk3568 </tag>
             
@@ -1055,9 +1078,9 @@
       
         <tags>
             
-            <tag> kernel </tag>
-            
             <tag> openHarmony </tag>
+            
+            <tag> kernel </tag>
             
             <tag> rk3568 </tag>
             
@@ -1088,9 +1111,9 @@
       
         <tags>
             
-            <tag> kernel </tag>
-            
             <tag> openHarmony </tag>
+            
+            <tag> kernel </tag>
             
             <tag> rk3568 </tag>
             
@@ -1345,9 +1368,9 @@
       
         <tags>
             
-            <tag> kernel </tag>
-            
             <tag> openHarmony </tag>
+            
+            <tag> kernel </tag>
             
             <tag> rk3568 </tag>
             
@@ -1432,9 +1455,9 @@
             
             <tag> linux </tag>
             
-            <tag> kernel </tag>
-            
             <tag> openHarmony </tag>
+            
+            <tag> kernel </tag>
             
             <tag> rk3568 </tag>
             
