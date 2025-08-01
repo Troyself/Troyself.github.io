@@ -1,0 +1,246 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>rk3568 uboot distro_cmd | TroyMitchell's blog</title><meta name="author" content="TroyMitchell"><meta name="copyright" content="TroyMitchell"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="bootcmd在uboot的shell中使用printenv命令可以看到bootcmd的字符串： &#x3D;&gt; printenv bootcmdbootcmd&#x3D;boot_android $&#123;devtype&#125; $&#123;devnum&#125;;boot_fit;bootrkp;run distro_bootcmd;  命令解析：    - boot_android: 查找并尝">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rk3568 uboot distro_cmd">
+<meta property="og:url" content="https://blog.troy-y.org/2024/08/23/Rockchip-%E7%B3%BB%E5%88%97%E8%8A%AF%E7%89%87uboot-distro-cmd/index.html">
+<meta property="og:site_name" content="TroyMitchell&#39;s blog">
+<meta property="og:description" content="bootcmd在uboot的shell中使用printenv命令可以看到bootcmd的字符串： &#x3D;&gt; printenv bootcmdbootcmd&#x3D;boot_android $&#123;devtype&#125; $&#123;devnum&#125;;boot_fit;bootrkp;run distro_bootcmd;  命令解析：    - boot_android: 查找并尝">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/133468432?v=4">
+<meta property="article:published_time" content="2024-08-23T08:12:48.000Z">
+<meta property="article:modified_time" content="2024-08-26T02:34:18.000Z">
+<meta property="article:author" content="TroyMitchell">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="kernel">
+<meta property="article:tag" content="rk3568">
+<meta property="article:tag" content="rockchip">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://avatars.githubusercontent.com/u/133468432?v=4"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "rk3568 uboot distro_cmd",
+  "url": "https://blog.troy-y.org/2024/08/23/Rockchip-%E7%B3%BB%E5%88%97%E8%8A%AF%E7%89%87uboot-distro-cmd/",
+  "image": "https://avatars.githubusercontent.com/u/133468432?v=4",
+  "datePublished": "2024-08-23T08:12:48.000Z",
+  "dateModified": "2024-08-26T02:34:18.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "TroyMitchell",
+      "url": "https://blog.troy-y.org"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://avatars.githubusercontent.com/u/133468432?v=4"><link rel="canonical" href="https://blog.troy-y.org/2024/08/23/Rockchip-%E7%B3%BB%E5%88%97%E8%8A%AF%E7%89%87uboot-distro-cmd/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.4.3"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'rk3568 uboot distro_cmd',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">62</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/top_img.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">TroyMitchell's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">rk3568 uboot distro_cmd</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">rk3568 uboot distro_cmd</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-08-23T08:12:48.000Z" title="发表于 2024-08-23 16:12:48">2024-08-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-08-26T02:34:18.000Z" title="更新于 2024-08-26 10:34:18">2024-08-26</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/kernel/">kernel</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/kernel/rockchip/">rockchip</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="bootcmd"><a href="#bootcmd" class="headerlink" title="bootcmd"></a>bootcmd</h2><p>在<code>uboot</code>的<code>shell</code>中使用<code>printenv</code>命令可以看到<code>bootcmd</code>的字符串：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">=&gt; <span class="built_in">printenv</span> bootcmd</span><br><span class="line">bootcmd=boot_android <span class="variable">$&#123;devtype&#125;</span> <span class="variable">$&#123;devnum&#125;</span>;boot_fit;bootrkp;run distro_bootcmd;</span><br></pre></td></tr></table></figure>
+
+<p>命令解析：<br>    - <code>boot_android</code>: 查找并尝试启动安卓镜像。<br>    - <code>boot_fix</code>: 查找并尝试启动fit格式镜像。<br>    - <code>bootrkp</code>: 查找并尝试启动rk分区镜像。<br>    - <code>run distro_bootcmd</code>: 这就是这篇文章的主角了，distro_bootcmd可以根据不同介质去启动<code>kernel</code>内核，比如<code>kernel</code>可以在sd卡，emmc上，都可以顺利启动。</p>
+<p>以上提到的<code>bootcmd</code>可以在<code>include/configs/rockchip-common.h</code>中看到相关定义：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">if</span> defined(CONFIG_AVB_VBMETA_PUBLIC_KEY_VALIDATE)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> RKIMG_BOOTCOMMAND			\</span></span><br><span class="line"><span class="meta">	<span class="string">&quot;boot_android $&#123;devtype&#125; $&#123;devnum&#125;;&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">elif</span> defined(CONFIG_FIT_SIGNATURE)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> RKIMG_BOOTCOMMAND			\</span></span><br><span class="line"><span class="meta">	<span class="string">&quot;boot_fit;&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> RKIMG_BOOTCOMMAND			\</span></span><br><span class="line"><span class="meta">	<span class="string">&quot;boot_android $&#123;devtype&#125; $&#123;devnum&#125;;&quot;</span>	\</span></span><br><span class="line"><span class="meta">	<span class="string">&quot;boot_fit;&quot;</span>				\</span></span><br><span class="line"><span class="meta">	<span class="string">&quot;bootrkp;&quot;</span>				\</span></span><br><span class="line"><span class="meta">	<span class="string">&quot;run distro_bootcmd;&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h2 id="distro-bootcmd"><a href="#distro-bootcmd" class="headerlink" title="distro_bootcmd"></a>distro_bootcmd</h2><p>现在来重点分析一下<code>distro_bootcmd</code>，首先使用打印出<code>distro_bootcmd</code>:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">=&gt; <span class="built_in">printenv</span> distro_bootcmd </span><br><span class="line">distro_bootcmd=<span class="keyword">for</span> target <span class="keyword">in</span> <span class="variable">$&#123;boot_targets&#125;</span>; <span class="keyword">do</span> run bootcmd_<span class="variable">$&#123;target&#125;</span>; <span class="keyword">done</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在<code>uboot</code>源码中找到对应实现，可以看到<code>BOOTENV_SET_SCSI_NEED_INIT</code>这个宏定义是空的，所以不必深究：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> BOOTENV \</span></span><br><span class="line"><span class="meta">    BOOTENV_BOOT_TARGETS</span></span><br><span class="line">    ...</span><br><span class="line">	BOOT_TARGET_DEVICES(BOOTENV_DEV)                                  \</span><br><span class="line">	\</span><br><span class="line">	<span class="string">&quot;distro_bootcmd=&quot;</span> BOOTENV_SET_SCSI_NEED_INIT                      \</span><br><span class="line">		<span class="string">&quot;for target in $&#123;boot_targets&#125;; do &quot;</span>                      \</span><br><span class="line">			<span class="string">&quot;run bootcmd_$&#123;target&#125;; &quot;</span>                         \</span><br><span class="line">		<span class="string">&quot;done\0&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="BOOTENV"><a href="#BOOTENV" class="headerlink" title="BOOTENV"></a>BOOTENV</h3><p>在这个<code>BOOTENV</code>宏定义中，定义了<code>distro_bootcmd</code>的值，<code>BOOTENV</code>在<code>include/configs/rk3568_common.h</code>中被使用到：</p>
+<figure class="highlight plaintext"><figcaption><span>CONFIG_EXTRA_ENV_SETTINGS \</span></figcaption><table><tr><td class="code"><pre><span class="line">	ENV_MEM_LAYOUT_SETTINGS \</span><br><span class="line">	&quot;partitions=&quot; PARTS_RKIMG \</span><br><span class="line">	ROCKCHIP_DEVICE_SETTINGS \</span><br><span class="line">	RKIMG_DET_BOOTDEV \</span><br><span class="line">	BOOTENV</span><br><span class="line">#endif</span><br></pre></td></tr></table></figure>
+
+<p>而<code>CONFIG_EXTRA_ENV_SETTINGS</code>又在<code>include/env_default.h</code>中被使用到：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifdef</span> DEFAULT_ENV_INSTANCE_EMBEDDED</span></span><br><span class="line"><span class="type">env_t</span> environment __UBOOT_ENV_SECTION__ = &#123;</span><br><span class="line">	ENV_CRC,	<span class="comment">/* CRC Sum */</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> CONFIG_SYS_REDUNDAND_ENVIRONMENT</span></span><br><span class="line">	<span class="number">1</span>,		<span class="comment">/* Flags: valid */</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">	&#123;</span><br><span class="line"><span class="meta">#<span class="keyword">elif</span> defined(DEFAULT_ENV_INSTANCE_STATIC)</span></span><br><span class="line"><span class="type">static</span> <span class="type">char</span> default_environment[] = &#123;</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="type">const</span> uchar default_environment[] = &#123;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span>	CONFIG_USE_BOOTARGS</span></span><br><span class="line">	<span class="string">&quot;bootargs=&quot;</span>	CONFIG_BOOTARGS			<span class="string">&quot;\0&quot;</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span>	CONFIG_BOOTCOMMAND</span></span><br><span class="line">	<span class="string">&quot;bootcmd=&quot;</span>	CONFIG_BOOTCOMMAND		<span class="string">&quot;\0&quot;</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">...</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span>	CONFIG_EXTRA_ENV_SETTINGS</span></span><br><span class="line">	CONFIG_EXTRA_ENV_SETTINGS</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">	<span class="string">&quot;\0&quot;</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> DEFAULT_ENV_INSTANCE_EMBEDDED</span></span><br><span class="line">	&#125;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="TODO-了解这个数组"><a href="#TODO-了解这个数组" class="headerlink" title="TODO 了解这个数组"></a>TODO 了解这个数组</h3><p>回到<code>distro_bootcmd</code>：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> BOOTENV \</span></span><br><span class="line"><span class="meta">    BOOTENV_BOOT_TARGETS</span></span><br><span class="line">    ...</span><br><span class="line">	BOOT_TARGET_DEVICES(BOOTENV_DEV)                                  \</span><br><span class="line">	\</span><br><span class="line">	<span class="string">&quot;distro_bootcmd=&quot;</span> BOOTENV_SET_SCSI_NEED_INIT                      \</span><br><span class="line">		<span class="string">&quot;for target in $&#123;boot_targets&#125;; do &quot;</span>                      \</span><br><span class="line">			<span class="string">&quot;run bootcmd_$&#123;target&#125;; &quot;</span>                         \</span><br><span class="line">		<span class="string">&quot;done\0&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这里其实就是一个循环，循环遍历<code> $&#123;boot_targets&#125;</code>并执行<code>bootcmd_$&#123;target&#125;</code>,查看<code> $&#123;boot_targets&#125;</code>相关定义：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// path: include/config_distro_bootcmd.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BOOTENV_DEV_NAME(devtypeu, devtypel, instance) \</span></span><br><span class="line"><span class="meta">	BOOTENV_DEV_NAME_##devtypeu(devtypeu, devtypel, instance)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BOOTENV_BOOT_TARGETS \</span></span><br><span class="line"><span class="meta">	<span class="string">&quot;boot_targets=&quot;</span> BOOT_TARGET_DEVICES(BOOTENV_DEV_NAME) <span class="string">&quot;\0&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="BOOTENV-BOOT-TARGETS生成boot-targets字符串"><a href="#BOOTENV-BOOT-TARGETS生成boot-targets字符串" class="headerlink" title="BOOTENV_BOOT_TARGETS生成boot_targets字符串"></a>BOOTENV_BOOT_TARGETS生成boot_targets字符串</h3><p>通过<code>BOOTENV_BOOT_TARGETS</code>宏定义生成了<code>boot_targets</code>字符串：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// path: include/config_distro_bootcmd.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BOOTENV_DEV_NAME(devtypeu, devtypel, instance) \</span></span><br><span class="line"><span class="meta">	BOOTENV_DEV_NAME_##devtypeu(devtypeu, devtypel, instance)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BOOTENV_BOOT_TARGETS \</span></span><br><span class="line"><span class="meta">	<span class="string">&quot;boot_targets=&quot;</span> BOOT_TARGET_DEVICES(BOOTENV_DEV_NAME) <span class="string">&quot;\0&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[!NOTE]<br>BOOTENV_BOOT_TARGETS也是在BOOTENV中定义的</p>
+</blockquote>
+<p><code>BOOTENV_BOOT_TARGETS</code>调用了<code>BOOT_TARGET_DEVICES</code>宏定义，<code>BOOT_TARGET_DEVICES</code>就是在对应的芯片上或芯片系列的定义了，不同的芯片应有不同的实现：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// path: include/configs/rockchip-common.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BOOT_TARGET_DEVICES(func) \</span></span><br><span class="line"><span class="meta">	BOOT_TARGET_MMC(func) \</span></span><br><span class="line"><span class="meta">	BOOT_TARGET_MTD(func) \</span></span><br><span class="line"><span class="meta">	BOOT_TARGET_RKNAND(func) \</span></span><br><span class="line"><span class="meta">	BOOT_TARGET_USB(func) \</span></span><br><span class="line"><span class="meta">	BOOT_TARGET_PXE(func) \</span></span><br><span class="line"><span class="meta">	BOOT_TARGET_DHCP(func)</span></span><br></pre></td></tr></table></figure>
+
+<p>这里宏定义定义成了6个宏，这里只研究<code>BOOT_TARGET_MMC</code>，其他都是差不多的：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// path: include/configs/rockchip-common.h</span></span><br><span class="line"><span class="comment">/* First try to boot from SD (index 1), then eMMC (index 0) */</span></span><br><span class="line"><span class="meta">#<span class="keyword">if</span> CONFIG_IS_ENABLED(CMD_MMC)</span></span><br><span class="line">	<span class="meta">#<span class="keyword">define</span> BOOT_TARGET_MMC(func) \</span></span><br><span class="line"><span class="meta">		func(MMC, mmc, 1) \</span></span><br><span class="line"><span class="meta">		func(MMC, mmc, 0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">	<span class="meta">#<span class="keyword">define</span> BOOT_TARGET_MMC(func)</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<p>逐级展开：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> BOOTENV_DEV_NAME(devtypeu, devtypel, instance) \</span></span><br><span class="line"><span class="meta">	BOOTENV_DEV_NAME_##devtypeu(devtypeu, devtypel, instance)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BOOTENV_BOOT_TARGETS \</span></span><br><span class="line"><span class="meta">	<span class="string">&quot;boot_targets=&quot;</span> BOOT_TARGET_DEVICES(BOOTENV_DEV_NAME) <span class="string">&quot;\0&quot;</span></span></span><br><span class="line"></span><br><span class="line">    -&gt;（这里就只展开mmc了，道理都一样）</span><br><span class="line">    <span class="string">&quot;boot_targets=&quot;</span>  BOOT_TARGET_MMC(BOOTENV_DEV_NAME) <span class="string">&quot;\0&quot;</span></span><br><span class="line">    -&gt;</span><br><span class="line">    <span class="string">&quot;boot_targets=&quot;</span>  BOOTENV_DEV_NAME(MMC, mmc, <span class="number">1</span>) \</span><br><span class="line">		                        BOOTENV_DEV_NAME(MMC, mmc, <span class="number">0</span>)<span class="string">&quot;\0&quot;</span></span><br><span class="line">    -&gt;</span><br><span class="line">    <span class="string">&quot;boot_targets=&quot;</span>  BOOTENV_DEV_NAME_MMC(MMC, mmc, <span class="number">1</span>) \</span><br><span class="line">		                        BOOTENV_DEV_NAME_MMC(MMC, mmc, <span class="number">0</span>)<span class="string">&quot;\0&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><code>BOOTENV_DEV_NAME_MMC</code>宏定义:</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// path: include/config_distro_bootcmd.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BOOTENV_DEV_NAME_BLKDEV(devtypeu, devtypel, instance) \</span></span><br><span class="line"><span class="meta">	#devtypel #instance <span class="string">&quot; &quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BOOTENV_DEV_NAME_MMC	BOOTENV_DEV_NAME_BLKDEV</span></span><br></pre></td></tr></table></figure>
+
+<p>继续展开：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> BOOTENV_DEV_NAME(devtypeu, devtypel, instance) \</span></span><br><span class="line"><span class="meta">	BOOTENV_DEV_NAME_##devtypeu(devtypeu, devtypel, instance)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BOOTENV_BOOT_TARGETS \</span></span><br><span class="line"><span class="meta">	<span class="string">&quot;boot_targets=&quot;</span> BOOT_TARGET_DEVICES(BOOTENV_DEV_NAME) <span class="string">&quot;\0&quot;</span></span></span><br><span class="line"></span><br><span class="line">    -&gt;（这里就只展开mmc了，道理都一样）</span><br><span class="line">    <span class="string">&quot;boot_targets=&quot;</span>  BOOT_TARGET_MMC(BOOTENV_DEV_NAME) <span class="string">&quot;\0&quot;</span></span><br><span class="line">    -&gt;</span><br><span class="line">    <span class="string">&quot;boot_targets=&quot;</span>  BOOTENV_DEV_NAME(MMC, mmc, <span class="number">1</span>) \</span><br><span class="line">		                        BOOTENV_DEV_NAME(MMC, mmc, <span class="number">0</span>)<span class="string">&quot;\0&quot;</span></span><br><span class="line">    -&gt;</span><br><span class="line">    <span class="string">&quot;boot_targets=&quot;</span>  BOOTENV_DEV_NAME_MMC(MMC, mmc, <span class="number">1</span>) \</span><br><span class="line">		                        BOOTENV_DEV_NAME_MMC(MMC, mmc, <span class="number">0</span>)<span class="string">&quot;\0&quot;</span></span><br><span class="line">    -&gt;</span><br><span class="line">    <span class="string">&quot;boot_targets=&quot;</span>  BOOTENV_DEV_NAME_BLKDEV(MMC, mmc, <span class="number">1</span>) \</span><br><span class="line">		                        BOOTENV_DEV_NAME_BLKDEV(MMC, mmc, <span class="number">0</span>)<span class="string">&quot;\0&quot;</span></span><br><span class="line">        -&gt;</span><br><span class="line">    <span class="string">&quot;boot_targets=&quot;</span>  mmc1 mmc0  <span class="string">&quot;\0&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>最后<code>boot_targets</code>就变成了下面这样，同时在<code>uboot</code>的<code>shell</code>中验证也是这样：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">=&gt; <span class="built_in">printenv</span> boot_targets </span><br><span class="line">boot_targets=mmc1 mmc0 mtd2 mtd1 mtd0 usb0 pxe dhcp </span><br></pre></td></tr></table></figure>
+
+<p><code>boot_targets</code>分析完了，但这只是我们<code>distro_bootcmd</code>循环的变量而已，还有一个<code>run bootcmd_$&#123;target&#125;;</code>没有分析，通过<code>boot_targets</code>能知道，这运行的大概就是<code>bootcmd_mmc0</code>, <code>bootcmd_mmc1</code>这样的东西。</p>
+<h3 id="生成distro-cmd运行命令"><a href="#生成distro-cmd运行命令" class="headerlink" title="生成distro_cmd运行命令"></a>生成distro_cmd运行命令</h3><p>在<code>BOOTENV</code>中有一个宏调用是<code>BOOT_TARGET_DEVICES(BOOTENV_DEV)</code>（上文BOOTENV代码中贴了），现在回顾一下<code>BOOT_TARGET_DEVICES</code>: </p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// path: include/configs/rockchip-common.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BOOT_TARGET_DEVICES(func) \</span></span><br><span class="line"><span class="meta">	BOOT_TARGET_MMC(func) \</span></span><br><span class="line"><span class="meta">	BOOT_TARGET_MTD(func) \</span></span><br><span class="line"><span class="meta">	BOOT_TARGET_RKNAND(func) \</span></span><br><span class="line"><span class="meta">	BOOT_TARGET_USB(func) \</span></span><br><span class="line"><span class="meta">	BOOT_TARGET_PXE(func) \</span></span><br><span class="line"><span class="meta">	BOOT_TARGET_DHCP(func)</span></span><br></pre></td></tr></table></figure>
+
+<p><code>BOOTENV_DEV</code>定义如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#define BOOTENV_DEV_BLKDEV(devtypeu, devtypel, instance) \</span><br><span class="line">	&quot;bootcmd_&quot; #devtypel #instance &quot;=&quot; \</span><br><span class="line">		&quot;setenv devnum &quot; #instance &quot;; &quot; \</span><br><span class="line">		&quot;run &quot; #devtypel &quot;_boot\0&quot;</span><br></pre></td></tr></table></figure>
+
+<p>逐级展开（只讨论mmc）:</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">   BOOT_TARGET_DEVICES(BOOTENV_DEV)</span><br><span class="line"></span><br><span class="line">   -&gt;（这里就只展开mmc了，道理都一样）</span><br><span class="line">       BOOT_TARGET_MMC(BOOTENV_DEV) \</span><br><span class="line">   -&gt;</span><br><span class="line">   BOOTENV_DEV(MMC, mmc, <span class="number">1</span>) \</span><br><span class="line">BOOTENV_DEV(MMC, mmc, <span class="number">0</span>)<span class="string">&quot;\0&quot;</span></span><br><span class="line">   -&gt;</span><br><span class="line">   <span class="string">&quot;bootcmd_mmc1=setenv devnum 1;run mmc1_boot\0&quot;</span> \</span><br><span class="line">   <span class="string">&quot;bootcmd_mmc0=setenv devnum 0;run mmc0_boot\0&quot;</span> \</span><br></pre></td></tr></table></figure>
+
+
+
+
+<h2 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Andyshrk/article/details/89136721">https://blog.csdn.net/Andyshrk/article/details/89136721</a><br><a target="_blank" rel="noopener" href="https://juejin.cn/post/7202851843488088125">https://juejin.cn/post/7202851843488088125</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://blog.troy-y.org">TroyMitchell</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.troy-y.org/2024/08/23/Rockchip-%E7%B3%BB%E5%88%97%E8%8A%AF%E7%89%87uboot-distro-cmd/">https://blog.troy-y.org/2024/08/23/Rockchip-%E7%B3%BB%E5%88%97%E8%8A%AF%E7%89%87uboot-distro-cmd/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.troy-y.org" target="_blank">TroyMitchell's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/kernel/">kernel</a><a class="post-meta__tags" href="/tags/rk3568/">rk3568</a><a class="post-meta__tags" href="/tags/rockchip/">rockchip</a></div><div class="post-share"><div class="social-share" data-image="https://avatars.githubusercontent.com/u/133468432?v=4" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/08/24/home-assistant%E8%BF%9C%E7%A8%8B%E8%AE%BF%E9%97%AE/" title="home assistant远程访问"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">home assistant远程访问</div></div><div class="info-2"><div class="info-item-1">根据链接创建内网穿透：https://sspai.com/post/79278 此时打开域名会显示如下信息：  查看home assistant的日志：  此时可以看到一个ip，记录下来。 打开homeassistant的配置文件： vim # 文件末尾添加以下内容http:  use_x_forwarded_for: true  trusted_proxies:    - &lt;log中的ip地址&gt;  重启ha，问题解决 Refhttps://cloud.tencent.com/developer/article/2260090 </div></div></div></a><a class="pagination-related" href="/2024/08/23/rk3568%E7%A7%BB%E6%A4%8Duboot/" title="Rockchip 系列启动流程解读"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Rockchip 系列启动流程解读</div></div><div class="info-2"><div class="info-item-1">Soc启动流程Soc在上电之后，第一个执行的代码是芯片是BootRom，通常来说，SoC厂家都会做一个ROM在SoC的内部，这个ROM很小，里面固化了上电启动的代码（一经固化，永不能改，是芯片做的时候，做进去的）；这部分代码呢，我们管它叫做BootROM，也叫作一级启动程序。 BootRom需要做的事情：初始化系统，CPU的配置，关闭看门狗，初始化时钟，初始化一些外设（比如 USB Controller、MMC Controller，Nand Controller等）； BootROM的代码除了去初始化硬件环境以外，还需要去外部存储器上面，将接下来可执行的程序读到内存来执行。 但此时dram还没有初始化完成，所以并不能直接读取程序到dram上执行，这时候芯片内部自带的sram就派上用场了，但sram造价高昂，所以通常内存容量较小，只能加载一小段程序到sram运行，这一小段程序只需要负责初始化dram。 初始化好dram之后将跳会到BootRom，BootRom再加载一段程序用以将uboot和trust复制到dram并运行。 上文提到了一个专业名词叫做trust，因为RK3399是...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/07/31/rk3568-sd-card%E6%97%A0%E6%B3%95%E6%A3%80%E6%B5%8B-1/" title="rk3568 sd card无法检测"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-31</div><div class="info-item-2">rk3568 sd card无法检测</div></div><div class="info-2"><div class="info-item-1">配置好设备树节点后插入sd卡无法检测。 设备树节点如下： &amp;sdmmc0 &#123;	bus-width = &lt;4&gt;;	cap-sd-highspeed;	cd-gpios = &lt;&amp;gpio0 RK_PA4 GPIO_ACTIVE_LOW&gt;;	disable-wp;	pinctrl-names = &quot;default&quot;;	pinctrl-0 = &lt;&amp;sdmmc0_bus4 &amp;sdmmc0_clk &amp;sdmmc0_cmd &amp;sdmmc0_det&gt;;	sd-uhs-sdr104;	vmmc-supply = &lt;&amp;vcc3v3_sd&gt;;	vqmmc-supply = &lt;&amp;vccio_sd&gt;;	status = &quot;okay&quot;;&#125;;  查看内核日志发现如下报错： dmesg | grep mmc[   12.226496] dwmmc_rockchip fe2b0000.mmc: Looking up vmmc-sup...</div></div></div></a><a class="pagination-related" href="/2024/08/08/rk3568%E4%B8%8D%E8%83%BD%E7%83%A7%E5%86%99%E9%97%AE%E9%A2%98/" title="rk3568不能烧写问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-08</div><div class="info-item-2">rk3568不能烧写问题</div></div><div class="info-2"><div class="info-item-1">烧写固件时被打断就会导致Loader和Maskrom模式都无法进入。 此时将sd卡刷写一个update.img，就可以进入Maskrom模式，此时可向emmc烧写镜像。 </div></div></div></a><a class="pagination-related" href="/2024/07/25/rk3568%E5%88%B7%E5%86%99openharmony3-2/" title="rk3568刷写openharmony3.2"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-25</div><div class="info-item-2">rk3568刷写openharmony3.2</div></div><div class="info-2"><div class="info-item-1">sudo upgrade_tool di -p parameter.txtsudo upgrade_tool UL MiniLoaderAll.bin -noresetsudo upgrade_tool di -u uboot.img &amp;&amp; sudo upgrade_tool di -boot_linux boot_linux.img&amp;&amp; sudo upgrade_tool di -system system.img &amp;&amp; sudo upgrade_tool di -vendor vendor.img &amp;&amp; sudo upgrade_tool di -userdata userdata.img &amp;&amp; sudo upgrade_tool di -ramdisk ramdisk.img &amp;&amp; sudo upgrade_tool di -resource resource.img &amp;&amp; sudo upgrade_tool di -sys-prod sys_prod.img &...</div></div></div></a><a class="pagination-related" href="/2024/09/03/rk3568%E7%A7%BB%E6%A4%8D%E4%B8%BB%E7%BA%BF%E5%86%85%E6%A0%B8/" title="rk3568移植主线内核"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-09-03</div><div class="info-item-2">rk3568移植主线内核</div></div><div class="info-2"><div class="info-item-1">EnvBoard: Lubancat-2io 这篇文章需要用到之前移植的uboot和extlinux的基础知识。 Get source❯ git clone git@github.com:torvalds/linux.git   查看一下dts的内容： ❯ ls arch/arm64/boot/dts/rockchip/rk3568* | grep lubancatarch/arm64/boot/dts/rockchip/rk3568-lubancat-2.dts  主线是有lubancat-2的设备树的，这就很大的方便了我们，可以稍作修改设备树即可完美在2io上全适配。 内核config配置❯ ls arch/arm64/configsdefconfig  hardening.config   virt.config  这里并没有rk3568 evb板子的配置文件，所以我们就先使用defconfig就好，遇到什么问题再解决什么问题。 ❯ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig❯ make ARCH=a...</div></div></div></a><a class="pagination-related" href="/2024/08/22/OpenHarmony-on-rk3568%E4%BD%BF%E8%83%BDcan/" title="OpenHarmony on rk3568使能can"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-22</div><div class="info-item-2">OpenHarmony on rk3568使能can</div></div><div class="info-2"><div class="info-item-1">EnvOH: v3.2.3chip: rk3568 Content首先查看源码中是否具有CAN_ROCKCHIP选项： ❯ find -name &quot;Kconfig&quot; -exec grep -n &quot;CAN_ROCKCHIP&quot; &#123;&#125; +❯   发现什么都没有..好吧，那看到官方的rk3568的补丁并没有打到这里，需要自己进行适配。 去rockchip的kernel仓库找到关于can的部分：https://github.com/rockchip-linux/kernel/blob/develop-5.10/drivers/net/can/rockchip/ 进入到我们的内核工作目录，没有Makefile创建的可以见这篇文章：https://blog.troy-y.org/2024/08/16/rk3568%E7%A7%BB%E6%A4%8DopenHarmony-v3-2-3-%E7%B3%BB%E7%BB%9F%E7%A7%BB%E6%A4%8D/ 将刚才仓库的文件无论用什么方式放到driver/net/can/rockch...</div></div></div></a><a class="pagination-related" href="/2024/08/21/rk3568%E4%BD%BF%E7%94%A8mini-pcie%E9%A9%B1%E5%8A%A8intel-7260/" title="OpenHarmony on rk3568驱动intel 7260无线网卡"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-21</div><div class="info-item-2">OpenHarmony on rk3568驱动intel 7260无线网卡</div></div><div class="info-2"><div class="info-item-1">EnvOH: v3.2.3chip: rk3568 Content使用以下命令查找intel 7260的驱动配置: ❯ find -name &quot;Kconfig&quot; -exec grep -n &quot;7260&quot; &#123;&#125; +./drivers/watchdog/Kconfig:689:	  Technologic Systems TS-7200, TS-7250 and TS-7260 boards have./drivers/net/wireless/intel/iwlwifi/Kconfig:22:		Intel 7260 Wi-Fi Adapter  在./drivers/net/wireless/intel/iwlwifi/Kconfig找到了其配置，进去查看： config IWLWIFI	tristate &quot;Intel Wireless WiFi Next Gen AGN - Wireless-N/Advanced-N/Ultimate-N (iwlwifi) &quot;	depends on PCI &am...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">TroyMitchell</div><div class="author-info-description">对弈平凡</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">62</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/TroyMitchell911"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">Words are cheap, I do.</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#bootcmd"><span class="toc-number">1.</span> <span class="toc-text">bootcmd</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#distro-bootcmd"><span class="toc-number">2.</span> <span class="toc-text">distro_bootcmd</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#BOOTENV"><span class="toc-number">2.1.</span> <span class="toc-text">BOOTENV</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TODO-%E4%BA%86%E8%A7%A3%E8%BF%99%E4%B8%AA%E6%95%B0%E7%BB%84"><span class="toc-number">2.2.</span> <span class="toc-text">TODO 了解这个数组</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#BOOTENV-BOOT-TARGETS%E7%94%9F%E6%88%90boot-targets%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">2.3.</span> <span class="toc-text">BOOTENV_BOOT_TARGETS生成boot_targets字符串</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E6%88%90distro-cmd%E8%BF%90%E8%A1%8C%E5%91%BD%E4%BB%A4"><span class="toc-number">2.4.</span> <span class="toc-text">生成distro_cmd运行命令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Ref"><span class="toc-number">3.</span> <span class="toc-text">Ref</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/smt-august-1-u2w/" title="smt-august-1-u2w">smt-august-1-u2w</a><time datetime="2025-08-01T07:27:58.000Z" title="发表于 2025-08-01 15:27:58">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/sd%E4%B8%8Emmc%E5%88%B7%E5%86%99%E6%8C%87%E5%8D%97/" title="sd与mmc刷写指南">sd与mmc刷写指南</a><time datetime="2025-08-01T07:25:00.169Z" title="发表于 2025-08-01 15:25:00">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/VirtualBox%E9%94%99%E8%AF%AF-1/" title="VirtualBox错误">VirtualBox错误</a><time datetime="2025-08-01T07:25:00.168Z" title="发表于 2025-08-01 15:25:00">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/esp32/" title="esp32初始化结构体问题">esp32初始化结构体问题</a><time datetime="2025-08-01T07:25:00.168Z" title="发表于 2025-08-01 15:25:00">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/07/06/IMPORTANT-lost-blog-notes/" title="IMPORTANT: lost blog notes">IMPORTANT: lost blog notes</a><time datetime="2025-07-05T23:16:14.000Z" title="发表于 2025-07-06 07:16:14">2025-07-06</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2020 - 2025 By TroyMitchell</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.4.3"></script><script src="/js/main.js?v=5.4.3"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/canvas-nest.min.js"></script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/click-heart.min.js" async="async" mobile="true"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

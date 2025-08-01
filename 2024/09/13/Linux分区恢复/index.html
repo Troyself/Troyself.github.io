@@ -1,0 +1,209 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Linux分区恢复 | TroyMitchell's blog</title><meta name="author" content="TroyMitchell"><meta name="copyright" content="TroyMitchell"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="在删除U盘分区的时候，忘了插U盘，直接把Ubuntu的efi分区删掉了。 直接原地红温… 不过还好删除的是分区不是数据，还有的救… 注意这时候千万不要重启系统！！！ 查看分区挂载： ❯ lsblkNAME        MAJ:MIN RM   SIZE RO TYPE MOUNTPOINTS...nvme0n1     259:0    0 953.9G  0 disk └─nvme0n1p2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux分区恢复">
+<meta property="og:url" content="https://blog.troy-y.org/2024/09/13/Linux%E5%88%86%E5%8C%BA%E6%81%A2%E5%A4%8D/index.html">
+<meta property="og:site_name" content="TroyMitchell&#39;s blog">
+<meta property="og:description" content="在删除U盘分区的时候，忘了插U盘，直接把Ubuntu的efi分区删掉了。 直接原地红温… 不过还好删除的是分区不是数据，还有的救… 注意这时候千万不要重启系统！！！ 查看分区挂载： ❯ lsblkNAME        MAJ:MIN RM   SIZE RO TYPE MOUNTPOINTS...nvme0n1     259:0    0 953.9G  0 disk └─nvme0n1p2">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/133468432?v=4">
+<meta property="article:published_time" content="2024-09-13T06:43:18.000Z">
+<meta property="article:modified_time" content="2024-09-13T06:43:20.000Z">
+<meta property="article:author" content="TroyMitchell">
+<meta property="article:tag" content="ubuntu">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://avatars.githubusercontent.com/u/133468432?v=4"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Linux分区恢复",
+  "url": "https://blog.troy-y.org/2024/09/13/Linux%E5%88%86%E5%8C%BA%E6%81%A2%E5%A4%8D/",
+  "image": "https://avatars.githubusercontent.com/u/133468432?v=4",
+  "datePublished": "2024-09-13T06:43:18.000Z",
+  "dateModified": "2024-09-13T06:43:20.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "TroyMitchell",
+      "url": "https://blog.troy-y.org"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://avatars.githubusercontent.com/u/133468432?v=4"><link rel="canonical" href="https://blog.troy-y.org/2024/09/13/Linux%E5%88%86%E5%8C%BA%E6%81%A2%E5%A4%8D/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.4.3"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Linux分区恢复',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">62</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/top_img.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">TroyMitchell's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">Linux分区恢复</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Linux分区恢复</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-09-13T06:43:18.000Z" title="发表于 2024-09-13 14:43:18">2024-09-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-09-13T06:43:20.000Z" title="更新于 2024-09-13 14:43:20">2024-09-13</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/kernel/">kernel</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>在删除U盘分区的时候，忘了插U盘，直接把Ubuntu的efi分区删掉了。</p>
+<p>直接原地红温…</p>
+<p>不过还好删除的是分区不是数据，还有的救…</p>
+<p><strong>注意这时候千万不要重启系统！！！</strong></p>
+<p>查看分区挂载：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ lsblk</span><br><span class="line">NAME        MAJ:MIN RM   SIZE RO TYPE MOUNTPOINTS</span><br><span class="line">...</span><br><span class="line">nvme0n1     259:0    0 953.9G  0 disk </span><br><span class="line">└─nvme0n1p2 259:2    0 953.4G  0 part /</span><br></pre></td></tr></table></figure>
+
+<p>已经看不见p1了，但是！</p>
+<p>执行如下命令安装众神之父<code>testdisk</code>:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ <span class="built_in">sudo</span> apt install testdisk </span><br></pre></td></tr></table></figure>
+
+<p>这个工具非常好用，可以自定义检测分区表，并且检测丢失的分区：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ <span class="built_in">sudo</span> testdisk /dev/nvme0n1</span><br></pre></td></tr></table></figure>
+
+<p>进入如下界面, 这里是选择磁盘，我只有一个盘，所以就直接按enter了：</p>
+<p><a target="_blank" rel="noopener" href="https://postimg.cc/DWBKtmzw"><img src="https://i.postimg.cc/26f8LZRh/2024-09-13-14-24-41.png" alt="2024-09-13-14-24-41.png"></a></p>
+<p>选择磁盘后需要选择你的磁盘分区表类型，Intel是自动选择，按道理应该是GPT分区，但是不太自信，所以选择了Intel进入：</p>
+<p><a target="_blank" rel="noopener" href="https://postimg.cc/qg7vjFWy"><img src="https://i.postimg.cc/nV49cbkR/2024-09-13-14-24-47.png" alt="2024-09-13-14-24-47.png"></a></p>
+<p>这里显示检测到了GPT分区，直接按Enter进入：</p>
+<p><a target="_blank" rel="noopener" href="https://postimg.cc/jCCRz7Jh"><img src="https://i.postimg.cc/qBxgHcJW/2024-09-13-14-25-08.png" alt="2024-09-13-14-25-08.png"></a></p>
+<p>在如下界面中直接选中Analyse回车：</p>
+<p><a target="_blank" rel="noopener" href="https://postimg.cc/Kkww74d9"><img src="https://i.postimg.cc/J0z8LkKW/2024-09-13-14-48-06.png" alt="2024-09-13-14-48-06.png"></a></p>
+<p>随后检测到分区结构如下，直接选择Quick Search回车：</p>
+<p><a target="_blank" rel="noopener" href="https://postimg.cc/bsX4sD0r"><img src="https://i.postimg.cc/qMgrD2zs/2024-09-13-14-51-29.png" alt="2024-09-13-14-51-29.png"></a></p>
+<p>接下来检测到一个可恢复分区FAT，回车进入后选择Write，选择Write只会重写你的分区信息，而不会删除你的分区数据，所以大可放心。</p>
+<p>选择Write之后会询问你是否确认，输入Y即可。</p>
+<p><a target="_blank" rel="noopener" href="https://postimg.cc/VSNV3jwG"><img src="https://i.postimg.cc/3wjQ0BcT/2024-09-13-14-25-12.png" alt="2024-09-13-14-25-12.png"></a></p>
+<p>写入之后重启系统，就可以看到心心念念的efi了。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ lsblk</span><br><span class="line">NAME        MAJ:MIN RM   SIZE RO TYPE MOUNTPOINTS</span><br><span class="line">...</span><br><span class="line">nvme0n1     259:0    0 953.9G  0 disk </span><br><span class="line">├─nvme0n1p1 259:1    0   512M  0 part /boot/efi</span><br><span class="line">└─nvme0n1p2 259:2    0 953.4G  0 part /</span><br></pre></td></tr></table></figure>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://blog.troy-y.org">TroyMitchell</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.troy-y.org/2024/09/13/Linux%E5%88%86%E5%8C%BA%E6%81%A2%E5%A4%8D/">https://blog.troy-y.org/2024/09/13/Linux%E5%88%86%E5%8C%BA%E6%81%A2%E5%A4%8D/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.troy-y.org" target="_blank">TroyMitchell's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/ubuntu/">ubuntu</a></div><div class="post-share"><div class="social-share" data-image="https://avatars.githubusercontent.com/u/133468432?v=4" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/09/20/%E5%85%A8%E5%BF%97A33-Vstar-Kernel/" title="[全志A33-Vstar]Kernel"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">[全志A33-Vstar]Kernel</div></div><div class="info-2"><div class="info-item-1">本文章基于该uboot启动：传送门 Envcpu: allwinner a33board: vstarhost: ubuntu 22.04 需要安装交叉编译工具链： ❯ sudo apt install gcc-arm-none-eabi  mainline首先下载主线kernel的源码： ❯ git clone git@github.com:torvalds/linux.git  配置文件的话，在arch/arm/configs目录下只有一个sunxi_defconfig是我们能够使用的，那么就使用这个配置文件作为基准。 设备树就选择sinlinx的，与vstar开发板相近。 与uboot套路类似，先拷贝一份配置文件和设备树作为vstar开发板的： ❯ cp arch/arm/configs/sunxi_defconfig arch/arm/configs/a33_vstar_defconfig❯ cp arch/arm/boot/dts/allwinner/sun8i-a33-sinlinx-sina33.dts arch/arm/boot/dts/allwinner/sun...</div></div></div></a><a class="pagination-related" href="/2024/09/13/%E5%85%A8%E5%BF%97A33-Uboot/" title="[全志A33-Vstar]Uboot"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">[全志A33-Vstar]Uboot</div></div><div class="info-2"><div class="info-item-1">Envcpu: allwinner a33board: vstarhost: ubuntu 22.04 需要安装交叉编译工具链： ❯ sudo apt install gcc-arm-linux-gnueabihf  FEL模式通过FEL模式可以启动uboot或将内核镜像等文件下载到内存，是个很方便的功能。 若要使用fel系列的工具，需要先安装： ❯ sudo apt-get install sunxi-tools  vstar开发板进入fel的方式有两种：  按住power键不松手，随后按reset，等待1s后放开power键 按住vol + 键不松手，随后按reset，连续短按5-10次power键后有一个灯闪烁一下，此时松开vol+键即可进入。  fel烧写uboot命令： ❯ sudo sunxi-fel uboot ./u-boot-sunxi-with-spl.bin  uboot-sunxi仓库试错该章节并没有成功，所以如果想学习可以看看，只是想移植uboot就可以跳到下一个章节 要移植uboot首先想到的肯定是全志的uboot仓库，先拉下来代码： ❯ git cl...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/11/29/Linux%E5%91%BD%E4%BB%A4%E8%A1%8C%E8%BF%90%E8%A1%8Cclash-verge/" title="Linux命令行运行clash-verge"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-11-29</div><div class="info-item-2">Linux命令行运行clash-verge</div></div><div class="info-2"><div class="info-item-1">由于太懒，不想配置clash core或者mihomo，就下了个clash verge，配置好之后断掉显示器启动电脑却发现clash-verge没有运行。 在Linux命令行中（tty, 没有display）是无法运行clash-verge的，如果直接运行，会出现： ❯ clash-verge(clash-verge:4357): Gtk-WARNING **: 20:22:40.304: cannot open display:  使用虚拟显示器运行： ❯ sudo apt install xvfb❯ Xvfb :1 -screen 0 1024x768x16 &amp;❯ export DISPLAY=:1 ❯ clash-verge &amp;  此时还不能科学，需要等待1到3秒左右，等待完成后查询端口是否监听成功（verge监听7897）： ❯ netstat -tuln | grep 7897tcp        0      0 127.0.0.1:7897          0.0.0.0:*               LISTENudp        0    ...</div></div></div></a><a class="pagination-related" href="/2024/08/12/Linux%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/" title="Linux服务器搭建nfs服务(转)"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-12</div><div class="info-item-2">Linux服务器搭建nfs服务(转)</div></div><div class="info-2"><div class="info-item-1">https://juejin.cn/post/6868085817987268616 </div></div></div></a><a class="pagination-related" href="/2024/08/12/Linux%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AEssh%E5%AF%86%E9%92%A5%E7%99%BB%E5%BD%95/" title="Linux服务器配置ssh密钥登录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-12</div><div class="info-item-2">Linux服务器配置ssh密钥登录</div></div><div class="info-2"><div class="info-item-1">What server doessudo vim /etc/ssh/sshd_config  打开如下选项： PubkeyAuthentication yes  使用如下命令生成密钥： ssh-keygencd .sshcat id_rsa.pub &gt;&gt; authorized_keys  重启sshd服务： sudo systemctl restart ssh  What client does复制.ssh目录下的id_rsa文件到~/.ssh目录下并重命名一个名字。 chmod 600 ./&lt;your id_rsa name&gt;   编辑hostname vim ~/.ssh/config  将以下内容添加进入： Host &lt;your server name&gt;HostName &lt;your server IP&gt;TCPKeepAlive yesServerAliveInterval 15User &lt;your user name of server&gt;IdentityFile &lt;your id_rsa file path&...</div></div></div></a><a class="pagination-related" href="/2024/10/05/Ubuntu22-04-4LTS%E5%AE%89%E8%A3%85AMD%E6%98%BE%E5%8D%A1%E9%A9%B1%E5%8A%A8/" title="Ubuntu22.04.4LTS安装AMD显卡驱动"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-05</div><div class="info-item-2">Ubuntu22.04.4LTS安装AMD显卡驱动</div></div><div class="info-2"><div class="info-item-1">AMD 7840HS core GPU driver: https://github.com/TroyMitchell911/Ubuntu-config/blob/main/deb/amdgpu-install_6.1.60103-1_all.deb  </div></div></div></a><a class="pagination-related" href="/2024/08/19/Ubuntu22-04-%E8%87%AA%E5%B8%A6%E8%BE%93%E5%85%A5%E6%B3%95%E5%8D%A1%E6%AD%BB%E9%97%AE%E9%A2%98/" title="Ubuntu22.04 自带输入法卡死问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-19</div><div class="info-item-2">Ubuntu22.04 自带输入法卡死问题</div></div><div class="info-2"><div class="info-item-1">https://github.com/libpinyin/ibus-libpinyin/issues/308 </div></div></div></a><a class="pagination-related" href="/2024/07/24/Ubuntu22-04%E5%A4%9A%E5%B1%8F%E9%97%AA%E7%83%81%E9%97%AE%E9%A2%98/" title="Ubuntu22.04多屏闪烁问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-24</div><div class="info-item-2">Ubuntu22.04多屏闪烁问题</div></div><div class="info-2"><div class="info-item-1">当电脑连接多个显示屏时，只要在副屏打字且光标没有悬浮在主屏幕，主屏幕就会白屏闪烁。 后续发现只有在终端和文件夹出现这个问题，想到安装了Blur my shell这个extension，并且指定了这两个app为模糊，在这个extension里面删掉这两个app的配置即可解决。 </div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">TroyMitchell</div><div class="author-info-description">对弈平凡</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">62</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/TroyMitchell911"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">Words are cheap, I do.</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/smt-august-1-u2w/" title="smt-august-1-u2w">smt-august-1-u2w</a><time datetime="2025-08-01T07:27:58.000Z" title="发表于 2025-08-01 15:27:58">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/sd%E4%B8%8Emmc%E5%88%B7%E5%86%99%E6%8C%87%E5%8D%97/" title="sd与mmc刷写指南">sd与mmc刷写指南</a><time datetime="2025-08-01T07:25:00.169Z" title="发表于 2025-08-01 15:25:00">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/VirtualBox%E9%94%99%E8%AF%AF-1/" title="VirtualBox错误">VirtualBox错误</a><time datetime="2025-08-01T07:25:00.168Z" title="发表于 2025-08-01 15:25:00">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/esp32/" title="esp32初始化结构体问题">esp32初始化结构体问题</a><time datetime="2025-08-01T07:25:00.168Z" title="发表于 2025-08-01 15:25:00">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/07/06/IMPORTANT-lost-blog-notes/" title="IMPORTANT: lost blog notes">IMPORTANT: lost blog notes</a><time datetime="2025-07-05T23:16:14.000Z" title="发表于 2025-07-06 07:16:14">2025-07-06</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2020 - 2025 By TroyMitchell</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.4.3"></script><script src="/js/main.js?v=5.4.3"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/canvas-nest.min.js"></script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/click-heart.min.js" async="async" mobile="true"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

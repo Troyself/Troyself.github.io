@@ -1,0 +1,254 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>rk3568移植主线内核 | TroyMitchell's blog</title><meta name="author" content="TroyMitchell"><meta name="copyright" content="TroyMitchell"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="EnvBoard: Lubancat-2io 这篇文章需要用到之前移植的uboot和extlinux的基础知识。 Get source❯ git clone git@github.com:torvalds&#x2F;linux.git   查看一下dts的内容： ❯ ls arch&#x2F;arm64&#x2F;boot&#x2F;dts&#x2F;rockchip&#x2F;rk3568* | grep lubancatarch&#x2F;arm64&#x2F;boot&#x2F;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rk3568移植主线内核">
+<meta property="og:url" content="https://blog.troy-y.org/2024/09/03/rk3568%E7%A7%BB%E6%A4%8D%E4%B8%BB%E7%BA%BF%E5%86%85%E6%A0%B8/index.html">
+<meta property="og:site_name" content="TroyMitchell&#39;s blog">
+<meta property="og:description" content="EnvBoard: Lubancat-2io 这篇文章需要用到之前移植的uboot和extlinux的基础知识。 Get source❯ git clone git@github.com:torvalds&#x2F;linux.git   查看一下dts的内容： ❯ ls arch&#x2F;arm64&#x2F;boot&#x2F;dts&#x2F;rockchip&#x2F;rk3568* | grep lubancatarch&#x2F;arm64&#x2F;boot&#x2F;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/133468432?v=4">
+<meta property="article:published_time" content="2024-09-03T08:09:32.000Z">
+<meta property="article:modified_time" content="2024-09-05T05:18:39.000Z">
+<meta property="article:author" content="TroyMitchell">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="kernel">
+<meta property="article:tag" content="rk3568">
+<meta property="article:tag" content="rockchip">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://avatars.githubusercontent.com/u/133468432?v=4"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "rk3568移植主线内核",
+  "url": "https://blog.troy-y.org/2024/09/03/rk3568%E7%A7%BB%E6%A4%8D%E4%B8%BB%E7%BA%BF%E5%86%85%E6%A0%B8/",
+  "image": "https://avatars.githubusercontent.com/u/133468432?v=4",
+  "datePublished": "2024-09-03T08:09:32.000Z",
+  "dateModified": "2024-09-05T05:18:39.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "TroyMitchell",
+      "url": "https://blog.troy-y.org"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://avatars.githubusercontent.com/u/133468432?v=4"><link rel="canonical" href="https://blog.troy-y.org/2024/09/03/rk3568%E7%A7%BB%E6%A4%8D%E4%B8%BB%E7%BA%BF%E5%86%85%E6%A0%B8/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.4.3"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'rk3568移植主线内核',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">62</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/top_img.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">TroyMitchell's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">rk3568移植主线内核</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">rk3568移植主线内核</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-09-03T08:09:32.000Z" title="发表于 2024-09-03 16:09:32">2024-09-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-09-05T05:18:39.000Z" title="更新于 2024-09-05 13:18:39">2024-09-05</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/kernel/">kernel</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/kernel/rockchip/">rockchip</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="Env"><a href="#Env" class="headerlink" title="Env"></a>Env</h2><p>Board: Lubancat-2io</p>
+<p>这篇文章需要用到之前移植的<a href="https://blog.troy-y.org/2024/08/26/rk3568%E7%A7%BB%E6%A4%8Duboot-1/">uboot</a>和<a href="https://blog.troy-y.org/2024/08/26/%E9%87%8E%E7%81%ABuboot%E4%BD%BF%E7%94%A8extboot%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8%E6%B5%81%E7%A8%8B/">extlinux</a>的基础知识。</p>
+<h2 id="Get-source"><a href="#Get-source" class="headerlink" title="Get source"></a>Get source</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ git <span class="built_in">clone</span> git@github.com:torvalds/linux.git </span><br></pre></td></tr></table></figure>
+
+<p>查看一下<code>dts</code>的内容：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ <span class="built_in">ls</span> <span class="built_in">arch</span>/arm64/boot/dts/rockchip/rk3568* | grep lubancat</span><br><span class="line"><span class="built_in">arch</span>/arm64/boot/dts/rockchip/rk3568-lubancat-2.dts</span><br></pre></td></tr></table></figure>
+
+<p>主线是有<code>lubancat-2</code>的设备树的，这就很大的方便了我们，可以稍作修改设备树即可完美在<code>2io</code>上全适配。</p>
+<h2 id="内核config配置"><a href="#内核config配置" class="headerlink" title="内核config配置"></a>内核config配置</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ <span class="built_in">ls</span> <span class="built_in">arch</span>/arm64/configs</span><br><span class="line">defconfig  hardening.config   virt.config</span><br></pre></td></tr></table></figure>
+
+<p>这里并没有<code>rk3568 evb</code>板子的配置文件，所以我们就先使用<code>defconfig</code>就好，遇到什么问题再解决什么问题。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig</span><br><span class="line">❯ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j32</span><br><span class="line">❯ <span class="built_in">ls</span> <span class="built_in">arch</span>/arm64/boot/dts/rockchip/rk3568-lubancat-2.dtb</span><br><span class="line"><span class="built_in">arch</span>/arm64/boot/dts/rockchip/rk3568-lubancat-2.dtb</span><br><span class="line">❯ <span class="built_in">ls</span> <span class="built_in">arch</span>/arm64/boot/Image</span><br><span class="line"><span class="built_in">arch</span>/arm64/boot/Image</span><br></pre></td></tr></table></figure>
+
+<p>依据<a href="https://blog.troy-y.org/2024/08/26/%E9%87%8E%E7%81%ABuboot%E4%BD%BF%E7%94%A8extboot%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8%E6%B5%81%E7%A8%8B/">extlinux</a>的经验，有了内核和设备树之后，我们只需要<code>extlinux.conf</code>文件即可。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ <span class="built_in">mkdir</span> -p extboot &amp;&amp; <span class="built_in">cp</span> <span class="built_in">arch</span>/arm64/boot/dts/rockchip/rk3568-lubancat-2.dtb extboot &amp;&amp; <span class="built_in">cp</span> <span class="built_in">arch</span>/arm64/boot/Image extboot/Image-master</span><br><span class="line">❯ <span class="built_in">mkdir</span> -p extboot/extlinux/extlinux.conf</span><br></pre></td></tr></table></figure>
+
+<p>在<code>extboot/extlinux/extlinux.conf</code>文件中写入如下内容：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">label rockchip-master</span><br><span class="line">    kernel /Image-master</span><br><span class="line">    fdt /rk3568-lubancat-2.dtb</span><br><span class="line">    append root=dev/mmcblk0p3 earlyprintk console=ttyFIQ0 console=tty1 consoleblank=0 loglevel=7 rootwait rw rootfstype=ext4 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory swapaccount=1 switolb=1 coherent_pool=1m</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>append</code>的<code>bootargs</code>来自于<code>lubancat</code>的<code>extlinux.conf</code>，创建好之后查看一下目录文件结构：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ tree extboot</span><br><span class="line">.</span><br><span class="line">├── extlinux</span><br><span class="line">│   ├── extlinux.conf</span><br><span class="line">├── Image-master</span><br><span class="line">├── rk3568-lubancat-2.dtb</span><br><span class="line"></span><br><span class="line">1 directory, 3 files</span><br></pre></td></tr></table></figure>
+
+<p>一切无误后，就可以生成boot分区的镜像了，注意，这个操作不要在<code>extboot</code>文件夹下操作，否则就会递归：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ genext2fs -b 32768 -B $((<span class="number">64</span>*<span class="number">1024</span>*<span class="number">1024</span>/<span class="number">32768</span>)) -d ./extboot -i 8192 -U boot.img</span><br></pre></td></tr></table></figure>
+
+<p>刷写进入系统后查看到如下<code>log</code>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line">Found /extlinux/extlinux.conf</span><br><span class="line">Retrieving file: /extlinux/extlinux.conf</span><br><span class="line">929 bytes <span class="built_in">read</span> <span class="keyword">in</span> 3 ms (301.8 KiB/s)</span><br><span class="line">3:      rockchip-6.10</span><br><span class="line">Retrieving file: /Image-6.10</span><br><span class="line">24766472 bytes <span class="built_in">read</span> <span class="keyword">in</span> 153 ms (154.4 MiB/s)</span><br><span class="line">append: dev/mmcblk0p3 earlyprintk console=ttyFIQ0 console=tty1 consoleblank=0 loglevel=7 rootwait rw rootfstype=ext4 cgroup_enable=cpuset cgroup_memory</span><br><span class="line">=1 cgroup_enable=memory swapaccount=1 switolb=1 coherent_pool=1m</span><br><span class="line">Retrieving file: /rk3568-lubancat-2.dtb</span><br><span class="line">60473 bytes <span class="built_in">read</span> <span class="keyword">in</span> 3 ms (19.2 MiB/s)</span><br><span class="line">Fdt Ramdisk skip relocation</span><br><span class="line">No misc partition</span><br><span class="line"><span class="comment">## Flattened Device Tree blob at 0x0a100000</span></span><br><span class="line">   Booting using the fdt blob at 0x0a100000</span><br><span class="line">   Using Device Tree <span class="keyword">in</span> place at 000000000a100000, end 000000000a111c38</span><br><span class="line">can<span class="string">&#x27;t found rockchip,drm-logo, use rockchip,fb-logo</span></span><br><span class="line"><span class="string">WARNING: could not set reg FDT_ERR_BADOFFSET.</span></span><br><span class="line"><span class="string">failed to reserve fb-loader-logo memory</span></span><br><span class="line"><span class="string">WARNING: could not set reg FDT_ERR_BADOFFSET.</span></span><br><span class="line"><span class="string">Adding bank: 0x00200000 - 0x08400000 (size: 0x08200000)</span></span><br><span class="line"><span class="string">Adding bank: 0x09400000 - 0xf0000000 (size: 0xe6c00000)</span></span><br><span class="line"><span class="string">Adding bank: 0x1f0000000 - 0x200000000 (size: 0x10000000)</span></span><br><span class="line"><span class="string">Total: 494.4/538.906 ms</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Starting kernel ...</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">I/TC: Secondary CPU 1 initializing</span></span><br><span class="line"><span class="string">I/TC: Secondary CPU 1 switching to normal world boot</span></span><br><span class="line"><span class="string">I/TC: Secondary CPU 2 initializing</span></span><br><span class="line"><span class="string">I/TC: Secondary CPU 2 switching to normal world boot</span></span><br><span class="line"><span class="string">I/TC: Secondary CPU 3 initializing</span></span><br><span class="line"><span class="string">I/TC: Secondary CPU 3 switching to normal world boot</span></span><br></pre></td></tr></table></figure>
+
+<p>然后就没有然后了…，看起来应该是<code>earlycon</code>不对，并且<code>console</code>也没起来，不然不应该什么输出都没有的。</p>
+<p>查看主线内核下的设备树文件发现chosen节点一穷二白：</p>
+<p><img src="https://i.imghippo.com/files/QsQIj1725352719.png" alt="chosen"></p>
+<p>参照鲁班猫的<code>sdk</code>的设备树可以发现<code>earlycon</code>被指定了一个<code>uart8250</code>:</p>
+<p><img src="https://i.imghippo.com/files/6o5uV1725353015.png" alt="chosen"></p>
+<p>参照鲁班猫的<code>sdk</code>的设备树编写<code>extlinux.conf</code>:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">label rockchip-master</span><br><span class="line">    kernel /Image-master</span><br><span class="line">    fdt /rk3568-lubancat-2.dtb</span><br><span class="line">    append root=dev/mmcblk0p3 earlycon=uart8250,mmio32,0xfe660000 console=ttyFIQ0 console=tty1 consoleblank=0 loglevel=7 rootwait rw rootfstype=ext4 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory swapaccount=1 switolb=1 coherent_pool=1m</span><br></pre></td></tr></table></figure>
+
+<p>重新制作镜像后烧写，发现确实在<code>CPU switch</code>之前就能看到<code>log</code>了，但是之后却没有。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[    0.000000] GICv3: MBI range [229:259]</span><br><span class="line">[    0.000000] GICv3: MBI range [289:319]</span><br><span class="line">[    0.000000] GICv3: Using MBI frame 0x00000000fd410000</span><br><span class="line">[    0.000000] Root IRQ handler: gic_handle_irq</span><br><span class="line">[    0.000000] GICv3: GICv3 features: 16 PPIs</span><br><span class="line">[    0.000000] GICv3: GICD_CTRL.DS=0, SCR_EL3.FIQ=1</span><br><span class="line">[    0.000000] GICv3: CPU0: found redistributor 0 region 0:0x00000000fd460000</span><br><span class="line">[    0.000000] ITS: No ITS available, not enabling LPIs</span><br><span class="line">[    0.000000] rcu: srcu_init: Setting srcu_struct sizes based on contention.</span><br><span class="line">[    0.000000] arch_timer: cp15 timer(s) running at 24.00MHz (phys).</span><br><span class="line">[    0.000000] clocksource: arch_sys_counter: mask: 0xffffffffffffff max_cycles: 0x588fe9dc0, max_idle_ns: 440795202592 ns</span><br><span class="line">[    0.000001] sched_clock: 56 bits at 24MHz, resolution 41ns, wraps every 4398046511097ns</span><br><span class="line">[    0.001817] Console: colour dummy device 80x25</span><br><span class="line">[    0.002270] printk: legacy console [tty1] enabled</span><br><span class="line">[    0.002741] printk: legacy bootconsole [uart8250] disabled</span><br><span class="line">I/TC: Secondary CPU 1 initializing</span><br><span class="line">I/TC: Secondary CPU 1 switching to normal world boot</span><br><span class="line">I/TC: Secondary CPU 2 initializing</span><br><span class="line">I/TC: Secondary CPU 2 switching to normal world boot</span><br><span class="line">I/TC: Secondary CPU 3 initializing</span><br><span class="line">I/TC: Secondary CPU 3 switching to normal world boot</span><br></pre></td></tr></table></figure>
+
+<p>在<code>extlinux.conf</code>文件中定义了这么一句话<code>console=ttyFIQ0</code>，并且在鲁班猫<code>sdk</code>里面能够看到该节点并且有对应的驱动:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ <span class="built_in">cat</span> <span class="built_in">arch</span>/arm64/boot/dts/rockchip/rk3568-lubancat-2.dtsi | grep fiq-debug</span><br><span class="line">	fiq-debugger &#123;</span><br><span class="line">		compatible = <span class="string">&quot;rockchip,fiq-debugger&quot;</span>;</span><br><span class="line">❯ find -name <span class="string">&quot;*.c&quot;</span> -<span class="built_in">exec</span> grep -n <span class="string">&quot;rockchip,fiq-debugger&quot;</span> &#123;&#125; +</span><br><span class="line">./drivers/soc/rockchip/rk_fiq_debugger.c:894:	&#123; .compatible = <span class="string">&quot;rockchip,fiq-debugger&quot;</span>, &#125;,</span><br></pre></td></tr></table></figure>
+
+<p>在主线内核的设备树和驱动里面都是没有这g些东西的，所以直接将<code>ttyFIQ0</code>改成<code>ttyS2,1500000</code>就行了，不走这个驱动了。</p>
+<p>这两个硬件上是一个东西，更改后的<code>conf</code>文件如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">label rockchip-master</span><br><span class="line">    kernel /Image-master</span><br><span class="line">    fdt /rk3568-lubancat-2.dtb</span><br><span class="line">    append root=dev/mmcblk0p3 earlycon=uart8250,mmio32,0xfe660000 console=ttyS2,1500000 consoleblank=0 loglevel=7 rootwait rw rootfstype=ext4 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory swapaccount=1 switolb=1 coherent_pool=1m</span><br></pre></td></tr></table></figure>
+
+<p>重新打包镜像并烧写，可以发现<code>log</code>全部都有了但是无法进入系统：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[    0.998974] mmcblk1rpmb: mmc1:0001 SC6311 4.00 MiB, chardev (239:0)</span><br><span class="line">[   10.939202] platform fe2b0000.mmc: deferred probe pending: platform: <span class="built_in">wait</span> <span class="keyword">for</span> supplier /i2c@fdd40000/pmic@20/regulators/LDO_REG5</span><br><span class="line">[   10.940228] platform fe720000.saradc: deferred probe pending: platform: <span class="built_in">wait</span> <span class="keyword">for</span> supplier /i2c@fdd40000/pmic@20/regulators/LDO_REG7</span><br><span class="line">[   10.941259] platform hdmi-sound: deferred probe pending: asoc-simple-card: parse error</span><br><span class="line">[   10.941969] platform fdc20000.syscon:io-domains: deferred probe pending: platform: <span class="built_in">wait</span> <span class="keyword">for</span> supplier /i2c@fdd40000/pmic@20/regulators/SWITCH_REG1</span><br><span class="line">[   10.943105] platform fe0a0000.hdmi: deferred probe pending: platform: <span class="built_in">wait</span> <span class="keyword">for</span> supplier /i2c@fdd40000/pmic@20/regulators/LDO_REG9</span><br></pre></td></tr></table></figure>
+
+<p>看起来是<code>regulator</code>的问题，查询设备树中<code>pmic</code>节点芯片对应的是<code>rk809</code>:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&amp;i2c0 &#123;</span><br><span class="line">	status = <span class="string">&quot;okay&quot;</span>;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">	rk809: pmic@20 &#123;</span><br><span class="line">		compatible = <span class="string">&quot;rockchip,rk809&quot;</span>;</span><br><span class="line">		reg = &lt;0x20&gt;;</span><br><span class="line">		interrupt-parent = &lt;&amp;gpio0&gt;;</span><br><span class="line">		interrupts = &lt;RK_PA3 IRQ_TYPE_LEVEL_LOW&gt;;</span><br><span class="line">		assigned-clocks = &lt;&amp;cru I2S1_MCLKOUT_TX&gt;;</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+
+<p>该设备是一个<code>i2c</code>设备，查找该设备对应的驱动：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ find -name <span class="string">&quot;*.c&quot;</span> -<span class="built_in">exec</span> grep -n <span class="string">&quot;rockchip,rk809&quot;</span> &#123;&#125; +</span><br><span class="line">./drivers/mfd/rk8xx-i2c.c:230:	&#123; .compatible = <span class="string">&quot;rockchip,rk809&quot;</span>, .data = &amp;rk809_data &#125;,</span><br><span class="line">❯ <span class="built_in">cat</span> ./drivers/mfd/Makefile | grep rk8xx</span><br><span class="line">obj-$(CONFIG_MFD_RK8XX)		+= rk8xx-core.o</span><br><span class="line">obj-$(CONFIG_MFD_RK8XX_I2C)	+= rk8xx-i2c.o</span><br><span class="line">obj-$(CONFIG_MFD_RK8XX_SPI)	+= rk8xx-spi.o</span><br></pre></td></tr></table></figure>
+
+<p>所以我们需要打开<code>CONFIG_MFD_RK8XX</code>和<code>CONFIG_MFD_RK8XX_I2C</code>这两个驱动配置。</p>
+<p>烧录到开发板中发现依旧卡死，但是<code>log</code>发生了变化：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[    1.015937] dwmmc_rockchip fe2b0000.mmc: Version ID is 270a</span><br><span class="line">[    1.016498] dwmmc_rockchip fe2b0000.mmc: DW MMC controller at irq 73,32 bit host data width,256 deep fifo</span><br><span class="line">[   11.158200] platform fe720000.saradc: deferred probe pending: rockchip-saradc: failed to get regulator</span><br><span class="line">[   11.159081] platform hdmi-sound: deferred probe pending: asoc-simple-card: parse error</span><br><span class="line">[   11.159808] platform fdc20000.syscon:io-domains: deferred probe pending: (reason unknown)</span><br><span class="line">[   11.159863] dwmmc_rockchip fe2b0000.mmc: IDMAC supports 32-bit address mode.</span><br><span class="line">[   11.160624] platform fe0a0000.hdmi: deferred probe pending: (reason unknown)</span><br><span class="line">[   11.161303] dwmmc_rockchip fe2b0000.mmc: Using internal DMA controller.</span><br><span class="line">[   11.162464] dwmmc_rockchip fe2b0000.mmc: Version ID is 270a</span><br><span class="line">[   11.163053] dwmmc_rockchip fe2b0000.mmc: DW MMC controller at irq 73,32 bit host data width,256 deep fifo</span><br></pre></td></tr></table></figure>
+
+<p>根据多年卡死经验直接判断是根文件系统无法挂载，但是换回之前鲁班猫的内核就又好了，说明不是文件系统的原因。</p>
+<p>进入<code>uboot</code>查看<code>emmc</code>:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">=&gt; mmc list</span><br><span class="line">dwmmc@fe2b0000: 1</span><br><span class="line">dwmmc@fe2c0000: 2</span><br><span class="line">sdhci@fe310000: 0 (eMMC)</span><br><span class="line">=&gt; mmc info</span><br><span class="line">Device: sdhci@fe310000</span><br><span class="line">Manufacturer ID: ea</span><br><span class="line">OEM: 2d00</span><br><span class="line">Name: SC631 </span><br><span class="line">Timing Interface: HS200</span><br><span class="line">Tran Speed: 200000000</span><br><span class="line">Rd Block Len: 512</span><br><span class="line">MMC version 5.1</span><br><span class="line">High Capacity: Yes</span><br><span class="line">Capacity: 29.1 GiB</span><br><span class="line">Bus Width: 8-bit</span><br><span class="line">Erase Group Size: 512 KiB</span><br><span class="line">HC WP Group Size: 8 MiB</span><br><span class="line">User Capacity: 29.1 GiB WRREL</span><br><span class="line">Boot Capacity: 4 MiB ENH</span><br><span class="line">RPMB Capacity: 4 MiB ENH</span><br></pre></td></tr></table></figure>
+
+<p>可以看到<code>emmc</code>走的是<code>sdhci</code>，查看设备树发现<code>aliases</code>居然把<code>sdhci</code>搞成了<code>mmc1</code>:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">aliases &#123;</span><br><span class="line">	ethernet0 = &amp;gmac0;</span><br><span class="line">	ethernet1 = &amp;gmac1;</span><br><span class="line">	mmc0 = &amp;sdmmc0;</span><br><span class="line">	mmc1 = &amp;sdhci;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>调换<code>sdhci</code>和<code>sdmmc0</code>的顺序：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">aliases &#123;</span><br><span class="line">	ethernet0 = &amp;gmac0;</span><br><span class="line">	ethernet1 = &amp;gmac1;</span><br><span class="line">	mmc1 = &amp;sdmmc0;</span><br><span class="line">	mmc0 = &amp;sdhci;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>此时成功进入系统：</p>
+<p><img src="https://i.imghippo.com/files/aqjXi1725354302.png" alt="system"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://blog.troy-y.org">TroyMitchell</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.troy-y.org/2024/09/03/rk3568%E7%A7%BB%E6%A4%8D%E4%B8%BB%E7%BA%BF%E5%86%85%E6%A0%B8/">https://blog.troy-y.org/2024/09/03/rk3568%E7%A7%BB%E6%A4%8D%E4%B8%BB%E7%BA%BF%E5%86%85%E6%A0%B8/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.troy-y.org" target="_blank">TroyMitchell's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/linux/">linux</a><a class="post-meta__tags" href="/tags/kernel/">kernel</a><a class="post-meta__tags" href="/tags/rk3568/">rk3568</a><a class="post-meta__tags" href="/tags/rockchip/">rockchip</a></div><div class="post-share"><div class="social-share" data-image="https://avatars.githubusercontent.com/u/133468432?v=4" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/09/04/OpenHarmony%E6%A0%87%E5%87%86%E7%B3%BB%E7%BB%9F%E8%AE%A4%E8%AF%81/" title="OpenHarmony标准系统认证"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">OpenHarmony标准系统认证</div></div><div class="info-2"><div class="info-item-1">环境配置该部分在Windows上完成 确保python版本为3.7以上，3.7.8是推荐的，但不是绝对的： python --versionPython 3.7.8  安装包： pip install -i https://pypi.tuna.tsinghua.edu.cn/simple setuptoolspip install -i https://pypi.tuna.tsinghua.edu.cn/simple pyserialpip install -i https://pypi.tuna.tsinghua.edu.cn/simple rsapip install -i https://pypi.tuna.tsinghua.edu.cn/simple python-dateutil  Acts应用兼容性测试在这里选择OH对应的版本的套件和资源文件。 需要注意的一点就是，Acts套件如果是arm32可以直接下载，但是其他的需要在OH源代码目录进行编译。 由于这里是arm64, 所以要编译一下Acts套件。 进入OH的源码根目录后： $ cd test/xts/acts$ ....</div></div></div></a><a class="pagination-related" href="/2024/08/30/rk3568%E7%9A%84minipcie%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8usb%E5%8A%9F%E8%83%BD/" title="rk3568的minipcie无法使用usb功能"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">rk3568的minipcie无法使用usb功能</div></div><div class="info-2"><div class="info-item-1">From a8f5220957ebf1e7b45b9093319e4a5a9da13024 Mon Sep 17 00:00:00 2001From: Troy Mitchell &lt;TroyMitchell988@gmail.com&gt;Date: Fri, 30 Aug 2024 14:11:28 +0800Subject: [PATCH 1/1] modify rk3568-hbis-p68.dtsi: 	add usb hub regulator node and the controling gpio that enables the hub.Signed-off-by: Troy Mitchell &lt;TroyMitchell988@gmail.com&gt;--- .../rk3568/kernel/dts/rk3568-hbis-p68.dtsi    | 86 +++++++++++++++++-- 1 file changed, 81 insertions(+), 5 deletions(-)diff --git a/device/board/hih...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/08/23/Rockchip-%E7%B3%BB%E5%88%97%E8%8A%AF%E7%89%87uboot-distro-cmd/" title="rk3568 uboot distro_cmd"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-23</div><div class="info-item-2">rk3568 uboot distro_cmd</div></div><div class="info-2"><div class="info-item-1">bootcmd在uboot的shell中使用printenv命令可以看到bootcmd的字符串： =&gt; printenv bootcmdbootcmd=boot_android $&#123;devtype&#125; $&#123;devnum&#125;;boot_fit;bootrkp;run distro_bootcmd;  命令解析：    - boot_android: 查找并尝试启动安卓镜像。    - boot_fix: 查找并尝试启动fit格式镜像。    - bootrkp: 查找并尝试启动rk分区镜像。    - run distro_bootcmd: 这就是这篇文章的主角了，distro_bootcmd可以根据不同介质去启动kernel内核，比如kernel可以在sd卡，emmc上，都可以顺利启动。 以上提到的bootcmd可以在include/configs/rockchip-common.h中看到相关定义： #if defined(CONFIG_AVB_VBMETA_PUBLIC_KEY_VALIDATE)#define RKIMG_BOOTCO...</div></div></div></a><a class="pagination-related" href="/2024/07/31/rk3568-sd-card%E6%97%A0%E6%B3%95%E6%A3%80%E6%B5%8B-1/" title="rk3568 sd card无法检测"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-31</div><div class="info-item-2">rk3568 sd card无法检测</div></div><div class="info-2"><div class="info-item-1">配置好设备树节点后插入sd卡无法检测。 设备树节点如下： &amp;sdmmc0 &#123;	bus-width = &lt;4&gt;;	cap-sd-highspeed;	cd-gpios = &lt;&amp;gpio0 RK_PA4 GPIO_ACTIVE_LOW&gt;;	disable-wp;	pinctrl-names = &quot;default&quot;;	pinctrl-0 = &lt;&amp;sdmmc0_bus4 &amp;sdmmc0_clk &amp;sdmmc0_cmd &amp;sdmmc0_det&gt;;	sd-uhs-sdr104;	vmmc-supply = &lt;&amp;vcc3v3_sd&gt;;	vqmmc-supply = &lt;&amp;vccio_sd&gt;;	status = &quot;okay&quot;;&#125;;  查看内核日志发现如下报错： dmesg | grep mmc[   12.226496] dwmmc_rockchip fe2b0000.mmc: Looking up vmmc-sup...</div></div></div></a><a class="pagination-related" href="/2024/08/08/rk3568%E4%B8%8D%E8%83%BD%E7%83%A7%E5%86%99%E9%97%AE%E9%A2%98/" title="rk3568不能烧写问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-08</div><div class="info-item-2">rk3568不能烧写问题</div></div><div class="info-2"><div class="info-item-1">烧写固件时被打断就会导致Loader和Maskrom模式都无法进入。 此时将sd卡刷写一个update.img，就可以进入Maskrom模式，此时可向emmc烧写镜像。 </div></div></div></a><a class="pagination-related" href="/2024/07/25/rk3568%E5%88%B7%E5%86%99openharmony3-2/" title="rk3568刷写openharmony3.2"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-25</div><div class="info-item-2">rk3568刷写openharmony3.2</div></div><div class="info-2"><div class="info-item-1">sudo upgrade_tool di -p parameter.txtsudo upgrade_tool UL MiniLoaderAll.bin -noresetsudo upgrade_tool di -u uboot.img &amp;&amp; sudo upgrade_tool di -boot_linux boot_linux.img&amp;&amp; sudo upgrade_tool di -system system.img &amp;&amp; sudo upgrade_tool di -vendor vendor.img &amp;&amp; sudo upgrade_tool di -userdata userdata.img &amp;&amp; sudo upgrade_tool di -ramdisk ramdisk.img &amp;&amp; sudo upgrade_tool di -resource resource.img &amp;&amp; sudo upgrade_tool di -sys-prod sys_prod.img &...</div></div></div></a><a class="pagination-related" href="/2024/08/22/OpenHarmony-on-rk3568%E4%BD%BF%E8%83%BDcan/" title="OpenHarmony on rk3568使能can"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-22</div><div class="info-item-2">OpenHarmony on rk3568使能can</div></div><div class="info-2"><div class="info-item-1">EnvOH: v3.2.3chip: rk3568 Content首先查看源码中是否具有CAN_ROCKCHIP选项： ❯ find -name &quot;Kconfig&quot; -exec grep -n &quot;CAN_ROCKCHIP&quot; &#123;&#125; +❯   发现什么都没有..好吧，那看到官方的rk3568的补丁并没有打到这里，需要自己进行适配。 去rockchip的kernel仓库找到关于can的部分：https://github.com/rockchip-linux/kernel/blob/develop-5.10/drivers/net/can/rockchip/ 进入到我们的内核工作目录，没有Makefile创建的可以见这篇文章：https://blog.troy-y.org/2024/08/16/rk3568%E7%A7%BB%E6%A4%8DopenHarmony-v3-2-3-%E7%B3%BB%E7%BB%9F%E7%A7%BB%E6%A4%8D/ 将刚才仓库的文件无论用什么方式放到driver/net/can/rockch...</div></div></div></a><a class="pagination-related" href="/2024/08/21/rk3568%E4%BD%BF%E7%94%A8mini-pcie%E9%A9%B1%E5%8A%A8intel-7260/" title="OpenHarmony on rk3568驱动intel 7260无线网卡"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-08-21</div><div class="info-item-2">OpenHarmony on rk3568驱动intel 7260无线网卡</div></div><div class="info-2"><div class="info-item-1">EnvOH: v3.2.3chip: rk3568 Content使用以下命令查找intel 7260的驱动配置: ❯ find -name &quot;Kconfig&quot; -exec grep -n &quot;7260&quot; &#123;&#125; +./drivers/watchdog/Kconfig:689:	  Technologic Systems TS-7200, TS-7250 and TS-7260 boards have./drivers/net/wireless/intel/iwlwifi/Kconfig:22:		Intel 7260 Wi-Fi Adapter  在./drivers/net/wireless/intel/iwlwifi/Kconfig找到了其配置，进去查看： config IWLWIFI	tristate &quot;Intel Wireless WiFi Next Gen AGN - Wireless-N/Advanced-N/Ultimate-N (iwlwifi) &quot;	depends on PCI &am...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">TroyMitchell</div><div class="author-info-description">对弈平凡</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">62</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/TroyMitchell911"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">Words are cheap, I do.</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Env"><span class="toc-number">1.</span> <span class="toc-text">Env</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Get-source"><span class="toc-number">2.</span> <span class="toc-text">Get source</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E6%A0%B8config%E9%85%8D%E7%BD%AE"><span class="toc-number">3.</span> <span class="toc-text">内核config配置</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/smt-august-1-u2w/" title="smt-august-1-u2w">smt-august-1-u2w</a><time datetime="2025-08-01T07:27:58.000Z" title="发表于 2025-08-01 15:27:58">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/sd%E4%B8%8Emmc%E5%88%B7%E5%86%99%E6%8C%87%E5%8D%97/" title="sd与mmc刷写指南">sd与mmc刷写指南</a><time datetime="2025-08-01T07:25:00.169Z" title="发表于 2025-08-01 15:25:00">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/VirtualBox%E9%94%99%E8%AF%AF-1/" title="VirtualBox错误">VirtualBox错误</a><time datetime="2025-08-01T07:25:00.168Z" title="发表于 2025-08-01 15:25:00">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/esp32/" title="esp32初始化结构体问题">esp32初始化结构体问题</a><time datetime="2025-08-01T07:25:00.168Z" title="发表于 2025-08-01 15:25:00">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/07/06/IMPORTANT-lost-blog-notes/" title="IMPORTANT: lost blog notes">IMPORTANT: lost blog notes</a><time datetime="2025-07-05T23:16:14.000Z" title="发表于 2025-07-06 07:16:14">2025-07-06</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2020 - 2025 By TroyMitchell</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.4.3"></script><script src="/js/main.js?v=5.4.3"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/canvas-nest.min.js"></script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/click-heart.min.js" async="async" mobile="true"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

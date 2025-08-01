@@ -1,0 +1,211 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Google cloud console免费shell玩法 | TroyMitchell's blog</title><meta name="author" content="TroyMitchell"><meta name="copyright" content="TroyMitchell"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="PrepGoogle cloud console我并不清楚是个什么东西，由percycle提供给我。直到现在，我只知道我能通过它创建12个shell配额。 此shell运行在docker中，并没有提供公网IP，这意味着可玩性大大降低，不能当作server使用。 目前已知的玩法：  Tailscale exit node  Link here: https:&#x2F;&#x2F;console.cloud.googl">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Google cloud console免费shell玩法">
+<meta property="og:url" content="https://blog.troy-y.org/2024/10/31/Goold-cloud-consle%E5%85%8D%E8%B4%B9shell%E7%8E%A9%E6%B3%95/index.html">
+<meta property="og:site_name" content="TroyMitchell&#39;s blog">
+<meta property="og:description" content="PrepGoogle cloud console我并不清楚是个什么东西，由percycle提供给我。直到现在，我只知道我能通过它创建12个shell配额。 此shell运行在docker中，并没有提供公网IP，这意味着可玩性大大降低，不能当作server使用。 目前已知的玩法：  Tailscale exit node  Link here: https:&#x2F;&#x2F;console.cloud.googl">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/133468432?v=4">
+<meta property="article:published_time" content="2024-10-31T15:08:01.000Z">
+<meta property="article:modified_time" content="2024-10-31T15:08:02.000Z">
+<meta property="article:author" content="TroyMitchell">
+<meta property="article:tag" content="network">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://avatars.githubusercontent.com/u/133468432?v=4"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Google cloud console免费shell玩法",
+  "url": "https://blog.troy-y.org/2024/10/31/Goold-cloud-consle%E5%85%8D%E8%B4%B9shell%E7%8E%A9%E6%B3%95/",
+  "image": "https://avatars.githubusercontent.com/u/133468432?v=4",
+  "datePublished": "2024-10-31T15:08:01.000Z",
+  "dateModified": "2024-10-31T15:08:02.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "TroyMitchell",
+      "url": "https://blog.troy-y.org"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://avatars.githubusercontent.com/u/133468432?v=4"><link rel="canonical" href="https://blog.troy-y.org/2024/10/31/Goold-cloud-consle%E5%85%8D%E8%B4%B9shell%E7%8E%A9%E6%B3%95/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.4.3"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Google cloud console免费shell玩法',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">62</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/top_img.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">TroyMitchell's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">Google cloud console免费shell玩法</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Google cloud console免费shell玩法</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-10-31T15:08:01.000Z" title="发表于 2024-10-31 23:08:01">2024-10-31</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-10-31T15:08:02.000Z" title="更新于 2024-10-31 23:08:02">2024-10-31</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/network/">network</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="Prep"><a href="#Prep" class="headerlink" title="Prep"></a>Prep</h2><p>Google cloud console我并不清楚是个什么东西，由<a target="_blank" rel="noopener" href="https://github.com/per1cycle">percycle</a>提供给我。直到现在，我只知道我能通过它创建12个shell配额。</p>
+<p>此<code>shell</code>运行在<code>docker</code>中，并没有提供<code>公网IP</code>，这意味着可玩性大大降低，不能当作<code>server</code>使用。</p>
+<p>目前已知的玩法：</p>
+<ul>
+<li>Tailscale exit node</li>
+</ul>
+<p>Link here: <a target="_blank" rel="noopener" href="https://console.cloud.google.com/">https://console.cloud.google.com/</a></p>
+<p><strong>PS:本文假设您已经注册了tailscale并且了解tailscale与tailscale exit node是什么</strong></p>
+<h2 id="Tailscale"><a href="#Tailscale" class="headerlink" title="Tailscale"></a>Tailscale</h2><p>首先创建此文件以摆脱烦人的警告：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">mkdir</span> -p ~/.cloudshell/</span><br><span class="line">$ <span class="built_in">touch</span> ~/.cloudshell/no-apt-get-warning</span><br></pre></td></tr></table></figure>
+
+<p>使用如下命令安装tailscale:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl -fsSL https://tailscale.com/install.sh | sh</span><br></pre></td></tr></table></figure>
+
+<p>此时收到调用<code>tailscale up</code>进行登陆，但这里不要直接使用该命令，因为我们需要作为<code>exit node</code>使用，所以要通过如下命令:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">sudo</span> tailscale up --advertise-exit-node</span><br></pre></td></tr></table></figure>
+
+<p>执行该命令后应该会收到一条提示，提示<code>tailscaled</code>并没有运行，这可能是因为<code>tailscaled</code>默认使用<code>systemd</code>启动，而这个容器并没有提供<code>systemd</code>。</p>
+<p>可以直接调用<code>tailscaled</code>或者使用<code>service</code>启动：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">sudo</span> tailscaled</span><br><span class="line"><span class="comment"># $ sudo service tailscaled start</span></span><br></pre></td></tr></table></figure>
+
+<p>重新运行up命令，此时应该收到一条提示登录的消息，在电脑上打开该链接进行登录。</p>
+<p>登录之后需要在<code>tailscale</code>控制台打开该<code>exit node</code>：</p>
+<p><a target="_blank" rel="noopener" href="https://postimg.cc/k2m5Yh4G"><img src="https://i.postimg.cc/7ZCT6Fr3/2024-10-31-23-03-38.png" alt="2024-10-31-23-03-38.png"></a></p>
+<p><a target="_blank" rel="noopener" href="https://postimg.cc/gXQzVgQY"><img src="https://i.postimg.cc/gjkxP5K6/2024-10-31-23-04-11.png" alt="2024-10-31-23-04-11.png"></a></p>
+<p>此时就应该将流量转发到<code>exit node</code>了，这个容器应该会根据你开的梯的IP地址所开启，我开的是台湾的梯，容器就是台湾的。这一点可以通过<code>ip138</code>确认是否流量转发成功:</p>
+<p><a target="_blank" rel="noopener" href="https://postimg.cc/PNDTGz0w"><img src="https://i.postimg.cc/2jc6Z0w2/2024-10-31-22-17-23.png" alt="2024-10-31-22-17-23.png"></a></p>
+<p>此外，该容器没有外网ip，可以使用<code>tailscale</code>提供的局域网ip进行连接，不过关闭了密码连接，我们也不知道密码。可以使用<code>ssh key</code>进行连接，这点是很通常的操作，我留给你去自己完成。</p>
+<p>提供成功<code>ssh</code>截图：</p>
+<p><a target="_blank" rel="noopener" href="https://postimg.cc/kB4rJQps"><img src="https://i.postimg.cc/CLCw4JC3/2024-10-31-22-39-31.png" alt="2024-10-31-22-39-31.png"></a></p>
+<h2 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h2><p><a target="_blank" rel="noopener" href="https://tailscale.com/download">https://tailscale.com/download</a><br><a target="_blank" rel="noopener" href="https://tailscale.com/kb/1103/exit-nodes?tab=linux">https://tailscale.com/kb/1103/exit-nodes?tab=linux</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://blog.troy-y.org">TroyMitchell</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.troy-y.org/2024/10/31/Goold-cloud-consle%E5%85%8D%E8%B4%B9shell%E7%8E%A9%E6%B3%95/">https://blog.troy-y.org/2024/10/31/Goold-cloud-consle%E5%85%8D%E8%B4%B9shell%E7%8E%A9%E6%B3%95/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.troy-y.org" target="_blank">TroyMitchell's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/network/">network</a></div><div class="post-share"><div class="social-share" data-image="https://avatars.githubusercontent.com/u/133468432?v=4" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/11/23/nextcloud-aio-cloudflare-tunnel/" title="nextcloud aio + cloudflare tunnel"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">nextcloud aio + cloudflare tunnel</div></div><div class="info-2"><div class="info-item-1">Refhttps://blog.laoda.de/archives/docker-compose-install-nextcloud-aiohttps://github.com/nextcloud/all-in-onehttps://github.com/nextcloud/all-in-one#how-to-change-the-default-location-of-nextclouds-datadirhttps://github.com/nextcloud/all-in-one/blob/main/reverse-proxy.mdhttps://help.nextcloud.com/t/using-nextcloud-aio-via-cloudflare-argo-tunnel/141376/4https://github.com/nextcloud/all-in-one/discussions/2845https://github.com/nextcloud/all-in-one#how-to-run-nextcloud-behind-a-cloudflare-tunnel </div></div></div></a><a class="pagination-related" href="/2024/10/29/rk3568%E5%88%B7%E5%86%99openharmony4-1/" title="rk3568刷写openharmony4.1"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">rk3568刷写openharmony4.1</div></div><div class="info-2"><div class="info-item-1">sudo upgrade_tool di -p parameter.txtsudo upgrade_tool UL MiniLoaderAll.bin -noresetsudo upgrade_tool di -u uboot.img &amp;&amp; sudo upgrade_tool di -boot_linux boot_linux.img&amp;&amp; sudo upgrade_tool di -system system.img &amp;&amp; sudo upgrade_tool di -vendor vendor.img &amp;&amp; sudo upgrade_tool di -userdata userdata.img &amp;&amp; sudo upgrade_tool di -ramdisk ramdisk.img &amp;&amp; sudo upgrade_tool di -resource resource.img &amp;&amp; sudo upgrade_tool di -sys-prod sys_prod.img &...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">TroyMitchell</div><div class="author-info-description">对弈平凡</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">62</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/TroyMitchell911"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">Words are cheap, I do.</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Prep"><span class="toc-number">1.</span> <span class="toc-text">Prep</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tailscale"><span class="toc-number">2.</span> <span class="toc-text">Tailscale</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Ref"><span class="toc-number">3.</span> <span class="toc-text">Ref</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/smt-august-1-u2w/" title="smt-august-1-u2w">smt-august-1-u2w</a><time datetime="2025-08-01T07:27:58.000Z" title="发表于 2025-08-01 15:27:58">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/sd%E4%B8%8Emmc%E5%88%B7%E5%86%99%E6%8C%87%E5%8D%97/" title="sd与mmc刷写指南">sd与mmc刷写指南</a><time datetime="2025-08-01T07:25:00.169Z" title="发表于 2025-08-01 15:25:00">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/VirtualBox%E9%94%99%E8%AF%AF-1/" title="VirtualBox错误">VirtualBox错误</a><time datetime="2025-08-01T07:25:00.168Z" title="发表于 2025-08-01 15:25:00">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/esp32/" title="esp32初始化结构体问题">esp32初始化结构体问题</a><time datetime="2025-08-01T07:25:00.168Z" title="发表于 2025-08-01 15:25:00">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/07/06/IMPORTANT-lost-blog-notes/" title="IMPORTANT: lost blog notes">IMPORTANT: lost blog notes</a><time datetime="2025-07-05T23:16:14.000Z" title="发表于 2025-07-06 07:16:14">2025-07-06</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2020 - 2025 By TroyMitchell</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.4.3"></script><script src="/js/main.js?v=5.4.3"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/canvas-nest.min.js"></script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/click-heart.min.js" async="async" mobile="true"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

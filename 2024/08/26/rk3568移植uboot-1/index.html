@@ -1,0 +1,194 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>rk3568移植uboot | TroyMitchell's blog</title><meta name="author" content="TroyMitchell"><meta name="copyright" content="TroyMitchell"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="EnvSystemt: Ubuntu 22.04 Content首先克隆仓库： ❯ git clone --depth&#x3D;1  https:&#x2F;&#x2F;github.com&#x2F;Caesar-github&#x2F;u-boot# 这是rkbin仓库，至于为什么克隆见https:&#x2F;&#x2F;blog.troy-y.org&#x2F;2024&#x2F;08&#x2F;23&#x2F;rk3568%E7%A7%BB%E6%A4%8Duboot&#x2F;❯ git clone -">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rk3568移植uboot">
+<meta property="og:url" content="https://blog.troy-y.org/2024/08/26/rk3568%E7%A7%BB%E6%A4%8Duboot-1/index.html">
+<meta property="og:site_name" content="TroyMitchell&#39;s blog">
+<meta property="og:description" content="EnvSystemt: Ubuntu 22.04 Content首先克隆仓库： ❯ git clone --depth&#x3D;1  https:&#x2F;&#x2F;github.com&#x2F;Caesar-github&#x2F;u-boot# 这是rkbin仓库，至于为什么克隆见https:&#x2F;&#x2F;blog.troy-y.org&#x2F;2024&#x2F;08&#x2F;23&#x2F;rk3568%E7%A7%BB%E6%A4%8Duboot&#x2F;❯ git clone -">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/133468432?v=4">
+<meta property="article:published_time" content="2024-08-26T02:52:09.000Z">
+<meta property="article:modified_time" content="2024-11-06T05:39:48.000Z">
+<meta property="article:author" content="TroyMitchell">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://avatars.githubusercontent.com/u/133468432?v=4"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "rk3568移植uboot",
+  "url": "https://blog.troy-y.org/2024/08/26/rk3568%E7%A7%BB%E6%A4%8Duboot-1/",
+  "image": "https://avatars.githubusercontent.com/u/133468432?v=4",
+  "datePublished": "2024-08-26T02:52:09.000Z",
+  "dateModified": "2024-11-06T05:39:48.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "TroyMitchell",
+      "url": "https://blog.troy-y.org"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://avatars.githubusercontent.com/u/133468432?v=4"><link rel="canonical" href="https://blog.troy-y.org/2024/08/26/rk3568%E7%A7%BB%E6%A4%8Duboot-1/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.4.3"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'rk3568移植uboot',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">62</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/top_img.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">TroyMitchell's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">rk3568移植uboot</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">rk3568移植uboot</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-08-26T02:52:09.000Z" title="发表于 2024-08-26 10:52:09">2024-08-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-11-06T05:39:48.000Z" title="更新于 2024-11-06 13:39:48">2024-11-06</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="Env"><a href="#Env" class="headerlink" title="Env"></a>Env</h1><p>Systemt: Ubuntu 22.04</p>
+<h2 id="Content"><a href="#Content" class="headerlink" title="Content"></a>Content</h2><p>首先克隆仓库：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ git <span class="built_in">clone</span> --depth=1  https://github.com/Caesar-github/u-boot</span><br><span class="line"><span class="comment"># 这是rkbin仓库，至于为什么克隆见https://blog.troy-y.org/2024/08/23/rk3568%E7%A7%BB%E6%A4%8Duboot/</span></span><br><span class="line">❯ git <span class="built_in">clone</span> --depth=1 git@github.com:Caesar-github/rkbin.git</span><br></pre></td></tr></table></figure>
+
+<p>执行以下命令：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ <span class="built_in">cd</span> uboot &amp;&amp; ./make.sh rk3568</span><br></pre></td></tr></table></figure>
+<p>生成以下文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">❯ <span class="built_in">ls</span> rk356x_spl_loader_v1.13.112.bin</span><br><span class="line">rk356x_spl_loader_v1.13.112.bin</span><br><span class="line">❯ <span class="built_in">ls</span> uboot.img</span><br><span class="line">uboot.img</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>rk356x_spl_loader_v1.13.112.bin</code>是由rkbin仓库的<code>ddr init.bin</code>和<code>miniloader</code>合并成的，了解原理并手动合成可以看<a href="https://blog.troy-y.org/2024/08/23/rk3568%E7%A7%BB%E6%A4%8Duboot/">https://blog.troy-y.org/2024/08/23/rk3568%E7%A7%BB%E6%A4%8Duboot/</a></p>
+<p><code>uboot.img</code>则是由<code>fit/u-boot.itb</code>拷贝来的，<code>fit/u-boot.itb</code>是一个<code>FIT</code>格式的镜像文件，由<code>fit/u-boot.its</code>指导生成，观察<code>fit/u-boot.its</code>文件如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">/*</span><br><span class="line"> * Copyright (C) 2020 Rockchip Electronic Co.,Ltd</span><br><span class="line"> *</span><br><span class="line"> * Simple U-boot fit <span class="built_in">source</span> file containing ATF/OP-TEE/U-Boot/dtb/MCU</span><br><span class="line"> */</span><br><span class="line"></span><br><span class="line">/dts-v1/;</span><br><span class="line"></span><br><span class="line">/ &#123;</span><br><span class="line">	description = <span class="string">&quot;FIT Image with ATF/OP-TEE/U-Boot/MCU&quot;</span>;</span><br><span class="line">	<span class="comment">#address-cells = &lt;1&gt;;</span></span><br><span class="line"></span><br><span class="line">	images &#123;</span><br><span class="line"></span><br><span class="line">		uboot &#123;</span><br><span class="line">			description = <span class="string">&quot;U-Boot&quot;</span>;</span><br><span class="line">			data = /incbin/(<span class="string">&quot;u-boot-nodtb.bin&quot;</span>);</span><br><span class="line">			<span class="built_in">type</span> = <span class="string">&quot;standalone&quot;</span>;</span><br><span class="line">			<span class="built_in">arch</span> = <span class="string">&quot;arm64&quot;</span>;</span><br><span class="line">			os = <span class="string">&quot;U-Boot&quot;</span>;</span><br><span class="line">			compression = <span class="string">&quot;none&quot;</span>;</span><br><span class="line">			load = &lt;0x00a00000&gt;;</span><br><span class="line">			<span class="built_in">hash</span> &#123;</span><br><span class="line">				algo = <span class="string">&quot;sha256&quot;</span>;</span><br><span class="line">			&#125;;</span><br><span class="line">		&#125;;</span><br><span class="line">		atf-1 &#123;</span><br><span class="line">			description = <span class="string">&quot;ARM Trusted Firmware&quot;</span>;</span><br><span class="line">			data = /incbin/(<span class="string">&quot;./bl31_0x00040000.bin&quot;</span>);</span><br><span class="line">			<span class="built_in">type</span> = <span class="string">&quot;firmware&quot;</span>;</span><br><span class="line">			<span class="built_in">arch</span> = <span class="string">&quot;arm64&quot;</span>;</span><br><span class="line">			os = <span class="string">&quot;arm-trusted-firmware&quot;</span>;</span><br><span class="line">			compression = <span class="string">&quot;none&quot;</span>;</span><br><span class="line">			load = &lt;0x00040000&gt;;</span><br><span class="line">			<span class="built_in">hash</span> &#123;</span><br><span class="line">				algo = <span class="string">&quot;sha256&quot;</span>;</span><br><span class="line">			&#125;;</span><br><span class="line">		&#125;;</span><br><span class="line">		atf-2 &#123;</span><br><span class="line">			description = <span class="string">&quot;ARM Trusted Firmware&quot;</span>;</span><br><span class="line">			data = /incbin/(<span class="string">&quot;./bl31_0xfdcc1000.bin&quot;</span>);</span><br><span class="line">			<span class="built_in">type</span> = <span class="string">&quot;firmware&quot;</span>;</span><br><span class="line">			<span class="built_in">arch</span> = <span class="string">&quot;arm64&quot;</span>;</span><br><span class="line">			os = <span class="string">&quot;arm-trusted-firmware&quot;</span>;</span><br><span class="line">			compression = <span class="string">&quot;none&quot;</span>;</span><br><span class="line">			load = &lt;0xfdcc1000&gt;;</span><br><span class="line">			<span class="built_in">hash</span> &#123;</span><br><span class="line">				algo = <span class="string">&quot;sha256&quot;</span>;</span><br><span class="line">			&#125;;</span><br><span class="line">		&#125;;</span><br><span class="line">		atf-3 &#123;</span><br><span class="line">			description = <span class="string">&quot;ARM Trusted Firmware&quot;</span>;</span><br><span class="line">			data = /incbin/(<span class="string">&quot;./bl31_0x0006a000.bin&quot;</span>);</span><br><span class="line">			<span class="built_in">type</span> = <span class="string">&quot;firmware&quot;</span>;</span><br><span class="line">			<span class="built_in">arch</span> = <span class="string">&quot;arm64&quot;</span>;</span><br><span class="line">			os = <span class="string">&quot;arm-trusted-firmware&quot;</span>;</span><br><span class="line">			compression = <span class="string">&quot;none&quot;</span>;</span><br><span class="line">			load = &lt;0x0006a000&gt;;</span><br><span class="line">			<span class="built_in">hash</span> &#123;</span><br><span class="line">				algo = <span class="string">&quot;sha256&quot;</span>;</span><br><span class="line">			&#125;;</span><br><span class="line">		&#125;;</span><br><span class="line">		atf-4 &#123;</span><br><span class="line">			description = <span class="string">&quot;ARM Trusted Firmware&quot;</span>;</span><br><span class="line">			data = /incbin/(<span class="string">&quot;./bl31_0xfdcd0000.bin&quot;</span>);</span><br><span class="line">			<span class="built_in">type</span> = <span class="string">&quot;firmware&quot;</span>;</span><br><span class="line">			<span class="built_in">arch</span> = <span class="string">&quot;arm64&quot;</span>;</span><br><span class="line">			os = <span class="string">&quot;arm-trusted-firmware&quot;</span>;</span><br><span class="line">			compression = <span class="string">&quot;none&quot;</span>;</span><br><span class="line">			load = &lt;0xfdcd0000&gt;;</span><br><span class="line">			<span class="built_in">hash</span> &#123;</span><br><span class="line">				algo = <span class="string">&quot;sha256&quot;</span>;</span><br><span class="line">			&#125;;</span><br><span class="line">		&#125;;</span><br><span class="line">		atf-5 &#123;</span><br><span class="line">			description = <span class="string">&quot;ARM Trusted Firmware&quot;</span>;</span><br><span class="line">			data = /incbin/(<span class="string">&quot;./bl31_0xfdcce000.bin&quot;</span>);</span><br><span class="line">			<span class="built_in">type</span> = <span class="string">&quot;firmware&quot;</span>;</span><br><span class="line">			<span class="built_in">arch</span> = <span class="string">&quot;arm64&quot;</span>;</span><br><span class="line">			os = <span class="string">&quot;arm-trusted-firmware&quot;</span>;</span><br><span class="line">			compression = <span class="string">&quot;none&quot;</span>;</span><br><span class="line">			load = &lt;0xfdcce000&gt;;</span><br><span class="line">			<span class="built_in">hash</span> &#123;</span><br><span class="line">				algo = <span class="string">&quot;sha256&quot;</span>;</span><br><span class="line">			&#125;;</span><br><span class="line">		&#125;;</span><br><span class="line">		atf-6 &#123;</span><br><span class="line">			description = <span class="string">&quot;ARM Trusted Firmware&quot;</span>;</span><br><span class="line">			data = /incbin/(<span class="string">&quot;./bl31_0x00068000.bin&quot;</span>);</span><br><span class="line">			<span class="built_in">type</span> = <span class="string">&quot;firmware&quot;</span>;</span><br><span class="line">			<span class="built_in">arch</span> = <span class="string">&quot;arm64&quot;</span>;</span><br><span class="line">			os = <span class="string">&quot;arm-trusted-firmware&quot;</span>;</span><br><span class="line">			compression = <span class="string">&quot;none&quot;</span>;</span><br><span class="line">			load = &lt;0x00068000&gt;;</span><br><span class="line">			<span class="built_in">hash</span> &#123;</span><br><span class="line">				algo = <span class="string">&quot;sha256&quot;</span>;</span><br><span class="line">			&#125;;</span><br><span class="line">		&#125;;</span><br><span class="line">		optee &#123;</span><br><span class="line">			description = <span class="string">&quot;OP-TEE&quot;</span>;</span><br><span class="line">			data = /incbin/(<span class="string">&quot;tee.bin&quot;</span>);</span><br><span class="line">			<span class="built_in">type</span> = <span class="string">&quot;firmware&quot;</span>;</span><br><span class="line">			<span class="built_in">arch</span> = <span class="string">&quot;arm64&quot;</span>;</span><br><span class="line">			os = <span class="string">&quot;op-tee&quot;</span>;</span><br><span class="line">			compression = <span class="string">&quot;none&quot;</span>;</span><br><span class="line">			</span><br><span class="line">			load = &lt;0x8400000&gt;;</span><br><span class="line">			<span class="built_in">hash</span> &#123;</span><br><span class="line">				algo = <span class="string">&quot;sha256&quot;</span>;</span><br><span class="line">			&#125;;</span><br><span class="line">		&#125;;</span><br><span class="line">		fdt &#123;</span><br><span class="line">			description = <span class="string">&quot;U-Boot dtb&quot;</span>;</span><br><span class="line">			data = /incbin/(<span class="string">&quot;./u-boot.dtb&quot;</span>);</span><br><span class="line">			<span class="built_in">type</span> = <span class="string">&quot;flat_dt&quot;</span>;</span><br><span class="line">			<span class="built_in">arch</span> = <span class="string">&quot;arm64&quot;</span>;</span><br><span class="line">			compression = <span class="string">&quot;none&quot;</span>;</span><br><span class="line">			<span class="built_in">hash</span> &#123;</span><br><span class="line">				algo = <span class="string">&quot;sha256&quot;</span>;</span><br><span class="line">			&#125;;</span><br><span class="line">		&#125;;</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	configurations &#123;</span><br><span class="line">		default = <span class="string">&quot;conf&quot;</span>;</span><br><span class="line">		conf &#123;</span><br><span class="line">			description = <span class="string">&quot;rk3568-evb&quot;</span>;</span><br><span class="line">			rollback-index = &lt;0x0&gt;;</span><br><span class="line">			firmware = <span class="string">&quot;atf-1&quot;</span>;</span><br><span class="line">			loadables = <span class="string">&quot;uboot&quot;</span>, <span class="string">&quot;atf-2&quot;</span>, <span class="string">&quot;atf-3&quot;</span>, <span class="string">&quot;atf-4&quot;</span>, <span class="string">&quot;atf-5&quot;</span>, <span class="string">&quot;atf-6&quot;</span>, <span class="string">&quot;optee&quot;</span>;</span><br><span class="line">			</span><br><span class="line">			fdt = <span class="string">&quot;fdt&quot;</span>;</span><br><span class="line">			signature &#123;</span><br><span class="line">				algo = <span class="string">&quot;sha256,rsa2048&quot;</span>;</span><br><span class="line">				</span><br><span class="line">				key-name-hint = <span class="string">&quot;dev&quot;</span>;</span><br><span class="line">				sign-images = <span class="string">&quot;fdt&quot;</span>, <span class="string">&quot;firmware&quot;</span>, <span class="string">&quot;loadables&quot;</span>;</span><br><span class="line">			&#125;;</span><br><span class="line">		&#125;;</span><br><span class="line">	&#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到这里面将<code>bl31</code>文件分成了很多块和<code>u-boot-nodtb.bin</code>还有<code>u-boot.dtb</code>放入了<code>u-boot.itb</code>，<code>bl31</code>文件是一个<code>trust</code>文件，也就是<code>ATF (Arm trust firmware)</code>，<code>ATF </code>主要负责在启动<code>uboot</code>之前把<code>CPU</code>从安全的<code>EL3</code>切换到 <code>EL2</code>，然后跳转到<code>uboot</code>，并且在内核启动后负责启动其他的CPU。</p>
+<h2 id="Ref"><a href="#Ref" class="headerlink" title="Ref"></a>Ref</h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zyly/p/17389525.html#_label0">https://www.cnblogs.com/zyly/p/17389525.html#_label0</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://blog.troy-y.org">TroyMitchell</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.troy-y.org/2024/08/26/rk3568%E7%A7%BB%E6%A4%8Duboot-1/">https://blog.troy-y.org/2024/08/26/rk3568%E7%A7%BB%E6%A4%8Duboot-1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.troy-y.org" target="_blank">TroyMitchell's blog</a>！</span></div></div><div class="tag_share"><div class="post-share"><div class="social-share" data-image="https://avatars.githubusercontent.com/u/133468432?v=4" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/08/26/%E9%87%8E%E7%81%ABuboot%E4%BD%BF%E7%94%A8extboot%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8%E6%B5%81%E7%A8%8B/" title="野火uboot使用extboot启动内核流程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">野火uboot使用extboot启动内核流程</div></div><div class="info-2"><div class="info-item-1">查看野火uboot参数: =&gt; printenv bootcmdbootcmd=run distro_bootcmd;boot_android $&#123;devtype&#125; $&#123;devnum&#125;;boot_fit;bootrkp;  可以看到第一个命令是distro_bootcmd，事实上，野火的extboot也就是从这里启动的: =&gt; printenv distro_bootcmd distro_bootcmd=for target in $&#123;boot_targets&#125;; do run bootcmd_$&#123;target&#125;; done  关于distro_bootcmd更详细的内容可以查看：https://blog.troy-y.org/2024/08/23/Rockchip-%E7%B3%BB%E5%88%97%E8%8A%AF%E7%89%87uboot-distro-cmd/ 这里直接进入到bootcmd_mmc0，也就是从emmc启动，sd卡大同小异: =&gt; printenv boot...</div></div></div></a><a class="pagination-related" href="/2024/08/26/docker%E6%90%AD%E5%BB%BA%E7%9A%84ha%E6%97%A0%E6%B3%95%E4%BD%BF%E7%94%A8homekit-bridge/" title="docker搭建的ha无法使用homekit bridge"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">docker搭建的ha无法使用homekit bridge</div></div><div class="info-2"><div class="info-item-1">Refhttps://juejin.cn/post/7075383203820732430 </div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">TroyMitchell</div><div class="author-info-description">对弈平凡</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">62</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">25</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/TroyMitchell911"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">Words are cheap, I do.</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Env"><span class="toc-number">1.</span> <span class="toc-text">Env</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Content"><span class="toc-number">1.1.</span> <span class="toc-text">Content</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Ref"><span class="toc-number">1.2.</span> <span class="toc-text">Ref</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/smt-august-1-u2w/" title="smt-august-1-u2w">smt-august-1-u2w</a><time datetime="2025-08-01T07:27:58.000Z" title="发表于 2025-08-01 15:27:58">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/sd%E4%B8%8Emmc%E5%88%B7%E5%86%99%E6%8C%87%E5%8D%97/" title="sd与mmc刷写指南">sd与mmc刷写指南</a><time datetime="2025-08-01T07:25:00.169Z" title="发表于 2025-08-01 15:25:00">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/VirtualBox%E9%94%99%E8%AF%AF-1/" title="VirtualBox错误">VirtualBox错误</a><time datetime="2025-08-01T07:25:00.168Z" title="发表于 2025-08-01 15:25:00">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/esp32/" title="esp32初始化结构体问题">esp32初始化结构体问题</a><time datetime="2025-08-01T07:25:00.168Z" title="发表于 2025-08-01 15:25:00">2025-08-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/07/06/IMPORTANT-lost-blog-notes/" title="IMPORTANT: lost blog notes">IMPORTANT: lost blog notes</a><time datetime="2025-07-05T23:16:14.000Z" title="发表于 2025-07-06 07:16:14">2025-07-06</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2020 - 2025 By TroyMitchell</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.4.3"></script><script src="/js/main.js?v=5.4.3"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/canvas-nest.min.js"></script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/click-heart.min.js" async="async" mobile="true"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
