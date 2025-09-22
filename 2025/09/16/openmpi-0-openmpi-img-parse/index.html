@@ -1,0 +1,322 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>openmpi[0]-openmpi-img-parse | TroyMitchell's blog</title><meta name="author" content="TroyMitchell"><meta name="copyright" content="TroyMitchell"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="openmpi[0]-openmpi-img-parseopenmpi[1] 什么是openmpiopenmpi[2] 模块化组件架构openmpi[3] btl框架的self组件分析  总览Open MPI（Open 对称多处理器接口）是一个开源、高性能的 MPI（消息传递接口）实现。 核心概念解释：  MPI (Message Passing Interface)：MPI 不是一个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="openmpi[0]-openmpi-img-parse">
+<meta property="og:url" content="https://blog.troy-y.org/2025/09/16/openmpi-0-openmpi-img-parse/index.html">
+<meta property="og:site_name" content="TroyMitchell&#39;s blog">
+<meta property="og:description" content="openmpi[0]-openmpi-img-parseopenmpi[1] 什么是openmpiopenmpi[2] 模块化组件架构openmpi[3] btl框架的self组件分析  总览Open MPI（Open 对称多处理器接口）是一个开源、高性能的 MPI（消息传递接口）实现。 核心概念解释：  MPI (Message Passing Interface)：MPI 不是一个">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/133468432?v=4">
+<meta property="article:published_time" content="2025-09-16T09:25:23.000Z">
+<meta property="article:modified_time" content="2025-09-22T03:38:13.217Z">
+<meta property="article:author" content="TroyMitchell">
+<meta property="article:tag" content="openmpi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://avatars.githubusercontent.com/u/133468432?v=4"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "openmpi[0]-openmpi-img-parse",
+  "url": "https://blog.troy-y.org/2025/09/16/openmpi-0-openmpi-img-parse/",
+  "image": "https://avatars.githubusercontent.com/u/133468432?v=4",
+  "datePublished": "2025-09-16T09:25:23.000Z",
+  "dateModified": "2025-09-22T03:38:13.217Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "TroyMitchell",
+      "url": "https://blog.troy-y.org"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://avatars.githubusercontent.com/u/133468432?v=4"><link rel="canonical" href="https://blog.troy-y.org/2025/09/16/openmpi-0-openmpi-img-parse/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.4.3"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":true,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'openmpi[0]-openmpi-img-parse',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">65</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">23</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">12</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/top_img.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">TroyMitchell's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">openmpi[0]-openmpi-img-parse</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">openmpi[0]-openmpi-img-parse</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-09-16T09:25:23.000Z" title="发表于 2025-09-16 17:25:23">2025-09-16</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-09-22T03:38:13.217Z" title="更新于 2025-09-22 11:38:13">2025-09-22</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/openmpi/">openmpi</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><!--<div align="center">-->
+  <!--<img src="" alt=""/>-->
+<!--</div>-->
+
+<ol class="series-items"><li><a href="/2025/09/16/openmpi-0-openmpi-img-parse/" title="openmpi[0]-openmpi-img-parse">openmpi[0]-openmpi-img-parse</a></li><li><a href="/2025/09/08/openmpi-1-what-is-openmpi/" title="openmpi[1] 什么是openmpi">openmpi[1] 什么是openmpi</a></li><li><a href="/2025/09/08/openmpi-2-modular-component-architecture/" title="openmpi[2] 模块化组件架构">openmpi[2] 模块化组件架构</a></li><li><a href="/2025/09/08/openmpi-3-btl-mca-self/" title="openmpi[3] btl框架的self组件分析">openmpi[3] btl框架的self组件分析</a></li></ol>
+
+<h2 id="总览"><a href="#总览" class="headerlink" title="总览"></a>总览</h2><p>Open MPI（Open 对称多处理器接口）是一个开源、高性能的 MPI（消息传递接口）实现。</p>
+<p>核心概念解释：</p>
+<ul>
+<li>MPI (Message Passing Interface)：MPI 不是一个编程语言，而是一个标准或规范。它定义了一套用于并行计算的函数库，允许不同的进程（通常运行在不同的处理器或计算节点上）通过显式地发送和接收消息来相互通信和协作。你可以把它想象成一套并行程序之间进行交流的“语言规则”。</li>
+<li>并行计算：指将一个大的计算任务分解成许多小任务，这些小任务可以同时（并行地）在多个处理器上执行，以缩短完成整个任务所需的时间。</li>
+<li>实现 (Implementation)：MPI 本身只是一个标准，具体的编程库需要由不同的组织或公司去“实现”。Open MPI 就是众多 MPI 实现中的一个，其他著名的实现包括 MPICH、Intel MPI 等。</li>
+</ul>
+<p>简而言之，Open MPI 就是一个让你能用 MPI 标准来编写并行程序，并在各种计算集群和多核处理器上高效运行这些程序的工具箱。</p>
+<p>MPI的编程方式，是“一处代码，多处执行”。编写过多线程的人应该能够理解，就是同样的代码，不同的进程执行不同的路径</p>
+<p>OpenMPI的架构图如下所示(old)：</p>
+<div align="center">
+  <img src="https://cdn.jsdelivr.net/gh/troyself/blog-img-bed//2025%2F09%2F22%2F20250922102157.png" alt="2025%2F09%2F22%2F20250922100058"/>
+</div>
+
+<p>自上向下依次为:</p>
+<ul>
+<li>OMPI(Open MPI)<ul>
+<li>由MPI 标准定义的接口</li>
+<li>暴露给上层的API接口，直接由应用程序调用</li>
+</ul>
+</li>
+<li>ORTE(Open MPI Run-Time Environment) - 目前已经被PRRTE所取代，不过都是runtime的一层<ul>
+<li>runtime system<ul>
+<li>加载，监控进程，杀死独立的进程</li>
+<li>重定向stdin, stdout, stderr</li>
+</ul>
+</li>
+<li>ORTE 进程管理方式：在简单的环境中，通过rsh或ssh 来launch 进程。而复杂环境(HPC专用)会有shceduler、resource manager等管理组件，面向多个用户进行公平的调度以及资源分配，ORTE支持多种管理环境，例如，orque&#x2F;PBS Pro, SLURM, Oracle Grid Engine, and LSF.</li>
+</ul>
+</li>
+<li>OPAL (Open, Portable Access Layer) (pronounced: o-pull): OPAL 是xOmpi的最底层,只作用于单个进程,负责不同环境的可移植性,包含了一些通用功能（例如链表、字符串操作、debug控制等等）.</li>
+</ul>
+<p>由于考虑到性能因素，Open MPI 有中“旁路”机制（bypass），ORTE以及OMPI层，可以绕过OPAL，直接与操作系统（甚至是硬件）进行交互.<br>例如OMPI会直接与网卡进行交互，从而达到最大的网络性能。这也就是为什么可以在架构图中看到，OMPI&#x2F;ORTE与操作系统有一个旁路接口。</p>
+<p>但是，openmpi自从v4.0开始，已经将ORTE移出openmpi框架。改为3rd-party并重命名为PRRTE.</p>
+<p>最新架构图如下：</p>
+<div align="center">
+  <img src="https://cdn.jsdelivr.net/gh/troyself/blog-img-bed//2025%2F09%2F22%2F20250922102224.png" alt="2025%2F09%2F22%2F20250922100321"/>
+</div>
+
+<h2 id="MCA-Architecture"><a href="#MCA-Architecture" class="headerlink" title="MCA Architecture"></a>MCA Architecture</h2><p>为了在 Open MPI 中使用类似功能但是不同实现，Open MPI 设计一套被称为Modular Component Architecture (MCA)的架构.</p>
+<p>MCA架构的核心思想是，允许用户通过配置文件来选择使用哪些组件，而不需要修改源代码。</p>
+<p>Open MPI 项目的架构图如下所示：</p>
+<div align="center">
+  <img src="https://cdn.jsdelivr.net/gh/troyself/blog-img-bed//2025%2F09%2F22%2F20250922102252.png" alt="2025%2F09%2F22%2F20250922100413"/>
+</div>
+
+
+<p>自顶向下依次为:</p>
+<ul>
+<li>Project: Project本质上是 Open MPI 代码库中最高抽象层的划分。但这里的Project可不是说的项目，而是指的Open MPI 代码库中主要的、顶层的代码部分<ul>
+<li>OMPI</li>
+<li>OPAL</li>
+<li>OSHMEM: 提供对称堆分配器，支持不同类型的内存分配器;实现OpenSHMEM标准的通信原语，如put&#x2F;get操作等;管理OpenSHMEM程序的初始化、进程管理和资源协调.</li>
+<li>… (maybe)</li>
+</ul>
+</li>
+<li>Framework:<ul>
+<li>BTL: 字节传输</li>
+<li>coll: 集合操作</li>
+<li>PML: 点对点传输</li>
+<li>…</li>
+</ul>
+</li>
+<li>Component:<ul>
+<li>self: 进程与他自身通信</li>
+<li>sm: 同一主机内的进程互相通信</li>
+<li>tcp: 通过tcp与其他主机内的进程通信</li>
+<li>…</li>
+</ul>
+</li>
+<li>Module:<ul>
+<li>eth0</li>
+<li>eth1</li>
+<li>…</li>
+</ul>
+</li>
+</ul>
+<h2 id="BTL-self-实现-同主机-同进程-不同线程通信"><a href="#BTL-self-实现-同主机-同进程-不同线程通信" class="headerlink" title="BTL&#x2F;self 实现: 同主机, 同进程, 不同线程通信"></a>BTL&#x2F;self 实现: 同主机, 同进程, 不同线程通信</h2><h3 id="component"><a href="#component" class="headerlink" title="component"></a>component</h3><div align="center">
+  <img src="https://cdn.jsdelivr.net/gh/troyself/blog-img-bed//2025%2F09%2F22%2F20250922102048.png" alt="2025%2F09%2F22%2F20250922102048"/>
+</div>
+
+<p>在btl的component实现中，最首先实现的是component的register和init函数。</p>
+<p>register函数向mca架构注册了mca参数，init函数完成了opal_freelist的init工作。</p>
+<p>这里提到了一个新的数据结构:opal_freelist, 这是Open MPI中OPAL层的一个核心内存管理组件，用于高效管理可重用对象的内存池。基于LIFO(后进先出)的内存池实现，主要作用是：</p>
+<ul>
+<li>内存池管理：预分配固定大小的内存块，避免频繁的malloc&#x2F;free操作</li>
+<li>对象重用：支持对象的快速分配和回收</li>
+<li>内存对齐：支持指定的内存对齐要求</li>
+<li>动态扩展：当内存池耗尽时可以自动增长</li>
+</ul>
+<p>当opal_freelist初始化时，每一个opal_freelist_item的内存结构图如下所示：</p>
+<div align="center">
+  <img src="https://cdn.jsdelivr.net/gh/troyself/blog-img-bed//2025%2F09%2F22%2F20250922111949.png" alt="2025%2F09%2F22%2F20250922111949"/>
+</div>
+
+<p>在最后还调用了一个add_procs函数，这个函数是为了判断当前进程是否可以用该组件(self)进行通信，这也是openmpi自动选择组件的核心支撑之一。</p>
+<p>self组件这里的实现很简单，就是判断想要与本进程通信的是不是本进程，如果是本进程则标记可以通信, 否则拒绝通信，让openmpi选择其他组件。</p>
+<p>其实add_procs也是下一个标题的ops的一部分，不过搬到这里来讲是因为笔者认为它们都属于”init”初始化工作的一部分。</p>
+<h3 id="ops"><a href="#ops" class="headerlink" title="ops"></a>ops</h3><p>在btl框架下的组件，需要实现btl框架要求的ops:</p>
+<ul>
+<li>add_procs: 已经在上面解释过</li>
+<li>del_procs: 删除process, 一般在finalize的时候调用，在self中直接返回成功</li>
+<li>finalize: 在self中直接返回成功</li>
+<li>alloc: 申请数据描述符函数(需要根据数据大小选择不同的数据描述符)</li>
+<li>free: 释放数据描述符函数</li>
+<li>prepare_src: 准备发送的数据</li>
+<li>send: 将数据实际发送</li>
+<li>sendi: prepare_src + send</li>
+<li>put: rdma put函数</li>
+<li>get: rdma get函数</li>
+</ul>
+<h4 id="send"><a href="#send" class="headerlink" title="send"></a>send</h4><div align="center">
+  <img src="https://cdn.jsdelivr.net/gh/troyself/blog-img-bed//2025%2F09%2F22%2F20250922112134.png" alt="2025%2F09%2F22%2F20250922112134"/>
+</div>
+
+<p>在send时，从MPI Application逐层调用，最终到达btl层。</p>
+<p>首先到达的并不会是send函数而是prepare_src函数，因为不是sendi这样的”原子操作”，所以数据准备发送是可以分开处理的。</p>
+<p>在prepare_src函数中，先调用alloc函数申请数据描述符，然后判断是否为内联函数。</p>
+<p>如果是内联函数，则直接将数据地址传递给数据描述符；否则通过iov将数据打包到数据描述符中的预申请buffer.</p>
+<p>数据描述符的内存空间是在opal_freelist初始化的时候申请的，目的就是为了非内联发送的数据缓存。</p>
+<p>之后在合适的时机调用到self的send函数。</p>
+<p>self的send函数直接调用openmpi btl内部的接收回调函数，并将prepare_src时准备的数据描述符作为参数传递进去。</p>
+<p>因为self是本进程与本进程通信，所有资源都是可以互相直接访问的，所以可以直接传递进去。</p>
+<h4 id="recv"><a href="#recv" class="headerlink" title="recv"></a>recv</h4><p>在recv函数中，直接就可以从openmpi里面准备好的数据描述符拿到数据。</p>
+<p>send &amp; recv完整流程图如下:</p>
+<div align="center">
+  <img src="https://cdn.jsdelivr.net/gh/troyself/blog-img-bed//2025%2F09%2F22%2F20250922103343.png" alt="2025%2F09%2F22%2F20250922103343"/>
+</div>
+
+<h4 id="rdma-put-get"><a href="#rdma-put-get" class="headerlink" title="rdma: put&#x2F;get"></a>rdma: put&#x2F;get</h4><p>在self进程中的rdma put&#x2F;get操作，因为知道目标地址与源地址，所以就不需要那些麻烦的数据描述符。</p>
+<p>而且是self进程间通信，所以rdma的put&#x2F;get操作可以直接通过memcpy完成。</p>
+<p>rdma put&#x2F;get的流程图如下:</p>
+<div align="center">
+  <img src="https://cdn.jsdelivr.net/gh/troyself/blog-img-bed//2025%2F09%2F22%2F20250922112610.png" alt="2025%2F09%2F22%2F20250922112610"/>
+</div>
+
+<h2 id="BTL-sm-实现-同主机-不同进程通信"><a href="#BTL-sm-实现-同主机-不同进程通信" class="headerlink" title="BTL&#x2F;sm 实现: 同主机, 不同进程通信"></a>BTL&#x2F;sm 实现: 同主机, 不同进程通信</h2><h3 id="component-1"><a href="#component-1" class="headerlink" title="component"></a>component</h3></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://blog.troy-y.org">TroyMitchell</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.troy-y.org/2025/09/16/openmpi-0-openmpi-img-parse/">https://blog.troy-y.org/2025/09/16/openmpi-0-openmpi-img-parse/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.troy-y.org" target="_blank">TroyMitchell's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/openmpi/">openmpi</a></div><div class="post-share"><div class="social-share" data-image="https://avatars.githubusercontent.com/u/133468432?v=4" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i>Buy me a coffee</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wxzsm.jpg" target="_blank"><img class="post-qr-code-img" src="/img/wxzsm.jpg"/></a><div class="post-qr-code-desc"></div></li></ul></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/09/08/openmpi-3-btl-mca-self/" title="openmpi[3] btl框架的self组件分析"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">openmpi[3] btl框架的self组件分析</div></div><div class="info-2"><div class="info-item-1">openmpi[0]-openmpi-img-parseopenmpi[1] 什么是openmpiopenmpi[2] 模块化组件架构openmpi[3] btl框架的self组件分析  在openmpi[2]中，已经分析了openmpi的模块化架构。对于本章节来说，上一章提到的framework对应的是btl;component对应的就是self; mca的意思就是mca模块🤣 self组件的分层在opal&#x2F;mca&#x2F;btl&#x2F;self目录中，可以看到如下文件： ❯ tree.├── btl_self.c├── btl_self_component.c├── btl_self_component.lo├── btl_self_frag.c├── btl_self_frag.h├── btl_self_frag.lo├── btl_self.h├── btl_self.lo├── libmca_btl_self.la├── Makefile├── Makefile.am├── Makefile.in└── owner.txt  除去不需要关心的编译相关...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2025/09/08/openmpi-1-what-is-openmpi/" title="openmpi[1] 什么是openmpi"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-09-08</div><div class="info-item-2">openmpi[1] 什么是openmpi</div></div><div class="info-2"><div class="info-item-1">openmpi[0]-openmpi-img-parseopenmpi[1] 什么是openmpiopenmpi[2] 模块化组件架构openmpi[3] btl框架的self组件分析  什么是openmpi?MPI是一套通信标准，由MPI Forum创建并维护（MPI Forum是一个开放组织，由工业、学术界的高性能计算领域的专家组成）.MPI是这样一种API：  可移植 高性能的IPC通信  MPI一般作为一个消息传递的中间件，上层应用程序可以通过调用MPI接口来执行消息传递。MPI定义了一系列与平台无关的、高度抽象的API接口，用于进程之间的消息传递(这两个进程之间可以在不同主机，但主机之间需要有一个通信的通道, 比如eth)举一个最简单的例子，进程X是发送进程，只需提供消息内容（例如一个双精度数组）以及另一个接收进程的标识（例如进程Y），同时接收进程Y只需提供发送进程的标识（例如进程X），消息就可以从X传递给Y。注意这个例子中，没有建立连接、没有字节流的转换、没有网络地址的交换，MPI将这些细节都抽象封装了起来，不仅仅是隐藏了复杂性，而且使应用程序能够兼容不同的平台、硬件...</div></div></div></a><a class="pagination-related" href="/2025/09/08/openmpi-2-modular-component-architecture/" title="openmpi[2] 模块化组件架构"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-09-08</div><div class="info-item-2">openmpi[2] 模块化组件架构</div></div><div class="info-2"><div class="info-item-1">openmpi[0]-openmpi-img-parseopenmpi[1] 什么是openmpiopenmpi[2] 模块化组件架构openmpi[3] btl框架的self组件分析  Open MPI 是一个高度可定制的系统；它可以通过配置文件、命令行参数和环境变量进行配置。Open MPI 配置系统的主要功能是通过模块化组件架构 (MCA) 实现的。 一些术语模块化组件架构 (MCA) 是 Open MPI 大部分功能的支柱。它由一系列项目 、 框架 、 组件和模块在运行时组装以创建 MPI 实现。 MCA 参数 （也称为 MCA 变量 ）用于定制 Open MPI 在运行时的行为。 ProjectProject本质上是 Open MPI 代码库中最高抽象层的划分。 但这里的Project可不是说的项目，而是指的Open MPI 代码库中主要的、顶层的代码部分 FrameworkMCA 框架在运行时管理零个或多个组件，并针对特定任务（例如，提供 MPI 集合操作功能）。虽然每个 MCA 框架仅支持一种类型的组件，但它可以支持多个该类型的组件。 比如btl framework...</div></div></div></a><a class="pagination-related" href="/2025/09/08/openmpi-3-btl-mca-self/" title="openmpi[3] btl框架的self组件分析"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-09-08</div><div class="info-item-2">openmpi[3] btl框架的self组件分析</div></div><div class="info-2"><div class="info-item-1">openmpi[0]-openmpi-img-parseopenmpi[1] 什么是openmpiopenmpi[2] 模块化组件架构openmpi[3] btl框架的self组件分析  在openmpi[2]中，已经分析了openmpi的模块化架构。对于本章节来说，上一章提到的framework对应的是btl;component对应的就是self; mca的意思就是mca模块🤣 self组件的分层在opal&#x2F;mca&#x2F;btl&#x2F;self目录中，可以看到如下文件： ❯ tree.├── btl_self.c├── btl_self_component.c├── btl_self_component.lo├── btl_self_frag.c├── btl_self_frag.h├── btl_self_frag.lo├── btl_self.h├── btl_self.lo├── libmca_btl_self.la├── Makefile├── Makefile.am├── Makefile.in└── owner.txt  除去不需要关心的编译相关...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">TroyMitchell</div><div class="author-info-description">对弈平凡</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">65</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">23</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">12</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/TroyMitchell911"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">Words are cheap, I do.</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E8%A7%88"><span class="toc-number">1.</span> <span class="toc-text">总览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MCA-Architecture"><span class="toc-number">2.</span> <span class="toc-text">MCA Architecture</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#BTL-self-%E5%AE%9E%E7%8E%B0-%E5%90%8C%E4%B8%BB%E6%9C%BA-%E5%90%8C%E8%BF%9B%E7%A8%8B-%E4%B8%8D%E5%90%8C%E7%BA%BF%E7%A8%8B%E9%80%9A%E4%BF%A1"><span class="toc-number">3.</span> <span class="toc-text">BTL&#x2F;self 实现: 同主机, 同进程, 不同线程通信</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#component"><span class="toc-number">3.1.</span> <span class="toc-text">component</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ops"><span class="toc-number">3.2.</span> <span class="toc-text">ops</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#send"><span class="toc-number">3.2.1.</span> <span class="toc-text">send</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#recv"><span class="toc-number">3.2.2.</span> <span class="toc-text">recv</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#rdma-put-get"><span class="toc-number">3.2.3.</span> <span class="toc-text">rdma: put&#x2F;get</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#BTL-sm-%E5%AE%9E%E7%8E%B0-%E5%90%8C%E4%B8%BB%E6%9C%BA-%E4%B8%8D%E5%90%8C%E8%BF%9B%E7%A8%8B%E9%80%9A%E4%BF%A1"><span class="toc-number">4.</span> <span class="toc-text">BTL&#x2F;sm 实现: 同主机, 不同进程通信</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#component-1"><span class="toc-number">4.1.</span> <span class="toc-text">component</span></a></li></ol></li></ol></div></div><div class="card-widget card-post-series"><div class="item-headline"><i class="fa-solid fa-layer-group"></i><span>系列文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/16/openmpi-0-openmpi-img-parse/" title="openmpi[0]-openmpi-img-parse">openmpi[0]-openmpi-img-parse</a><time datetime="2025-09-16T09:25:23.000Z" title="发表于 2025-09-16 17:25:23">2025-09-16</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/08/openmpi-3-btl-mca-self/" title="openmpi[3] btl框架的self组件分析">openmpi[3] btl框架的self组件分析</a><time datetime="2025-09-08T09:44:55.000Z" title="发表于 2025-09-08 17:44:55">2025-09-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/08/openmpi-2-modular-component-architecture/" title="openmpi[2] 模块化组件架构">openmpi[2] 模块化组件架构</a><time datetime="2025-09-08T07:49:21.000Z" title="发表于 2025-09-08 15:49:21">2025-09-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/08/openmpi-1-what-is-openmpi/" title="openmpi[1] 什么是openmpi">openmpi[1] 什么是openmpi</a><time datetime="2025-09-08T01:57:36.000Z" title="发表于 2025-09-08 09:57:36">2025-09-08</time></div></div></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/16/openmpi-0-openmpi-img-parse/" title="openmpi[0]-openmpi-img-parse">openmpi[0]-openmpi-img-parse</a><time datetime="2025-09-16T09:25:23.000Z" title="发表于 2025-09-16 17:25:23">2025-09-16</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/08/openmpi-3-btl-mca-self/" title="openmpi[3] btl框架的self组件分析">openmpi[3] btl框架的self组件分析</a><time datetime="2025-09-08T09:44:55.000Z" title="发表于 2025-09-08 17:44:55">2025-09-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/08/openmpi-2-modular-component-architecture/" title="openmpi[2] 模块化组件架构">openmpi[2] 模块化组件架构</a><time datetime="2025-09-08T07:49:21.000Z" title="发表于 2025-09-08 15:49:21">2025-09-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/08/openmpi-1-what-is-openmpi/" title="openmpi[1] 什么是openmpi">openmpi[1] 什么是openmpi</a><time datetime="2025-09-08T01:57:36.000Z" title="发表于 2025-09-08 09:57:36">2025-09-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/08/01/sd%E4%B8%8Emmc%E5%88%B7%E5%86%99%E6%8C%87%E5%8D%97/" title="sd与mmc刷写指南">sd与mmc刷写指南</a><time datetime="2025-08-01T07:25:00.169Z" title="发表于 2025-08-01 15:25:00">2025-08-01</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2020 - 2025 By TroyMitchell</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.4.3"></script><script src="/js/main.js?v=5.4.3"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/canvas-nest.min.js"></script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/click-heart.min.js" async="async" mobile="true"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.4.3"></script></div></div></body></html>
