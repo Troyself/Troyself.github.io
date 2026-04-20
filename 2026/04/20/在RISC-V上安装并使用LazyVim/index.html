@@ -1,0 +1,336 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>在RISC-V上安装并使用LazyVim | TroyMitchell's blog</title><meta name="author" content="TroyMitchell"><meta name="copyright" content="TroyMitchell"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="背景LazyVim 是基于 lazy.nvim 的 Neovim 预配置发行版，提供了开箱即用的现代编辑器体验。然而，lazy.nvim 强制要求 Neovim 必须使用 LuaJIT 构建，而官方 LuaJIT 并不支持 RISC-V 架构。 本文记录了在 RISC-V Linux 环境（Ubuntu&#x2F;Debian）上，从零开始编译安装 Neovim + LazyVim 的完整流程，包">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在RISC-V上安装并使用LazyVim">
+<meta property="og:url" content="https://blog.troy-y.org/2026/04/20/%E5%9C%A8RISC-V%E4%B8%8A%E5%AE%89%E8%A3%85%E5%B9%B6%E4%BD%BF%E7%94%A8LazyVim/index.html">
+<meta property="og:site_name" content="TroyMitchell&#39;s blog">
+<meta property="og:description" content="背景LazyVim 是基于 lazy.nvim 的 Neovim 预配置发行版，提供了开箱即用的现代编辑器体验。然而，lazy.nvim 强制要求 Neovim 必须使用 LuaJIT 构建，而官方 LuaJIT 并不支持 RISC-V 架构。 本文记录了在 RISC-V Linux 环境（Ubuntu&#x2F;Debian）上，从零开始编译安装 Neovim + LazyVim 的完整流程，包">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/133468432?v=4">
+<meta property="article:published_time" content="2026-04-20T09:09:46.000Z">
+<meta property="article:modified_time" content="2026-04-20T09:10:52.543Z">
+<meta property="article:author" content="TroyMitchell">
+<meta property="article:tag" content="RISC-V">
+<meta property="article:tag" content="Neovim">
+<meta property="article:tag" content="LazyVim">
+<meta property="article:tag" content="LuaJIT">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://avatars.githubusercontent.com/u/133468432?v=4"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "在RISC-V上安装并使用LazyVim",
+  "url": "https://blog.troy-y.org/2026/04/20/%E5%9C%A8RISC-V%E4%B8%8A%E5%AE%89%E8%A3%85%E5%B9%B6%E4%BD%BF%E7%94%A8LazyVim/",
+  "image": "https://avatars.githubusercontent.com/u/133468432?v=4",
+  "datePublished": "2026-04-20T09:09:46.000Z",
+  "dateModified": "2026-04-20T09:10:52.543Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "TroyMitchell",
+      "url": "https://blog.troy-y.org"
+    }
+  ]
+}</script><link rel="shortcut icon" href="https://avatars.githubusercontent.com/u/133468432?v=4"><link rel="canonical" href="https://blog.troy-y.org/2026/04/20/%E5%9C%A8RISC-V%E4%B8%8A%E5%AE%89%E8%A3%85%E5%B9%B6%E4%BD%BF%E7%94%A8LazyVim/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.4.3"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const mediaQueryDark = window.matchMedia('(prefers-color-scheme: dark)')
+          const mediaQueryLight = window.matchMedia('(prefers-color-scheme: light)')
+
+          if (theme === undefined) {
+            if (mediaQueryLight.matches) activateLightMode()
+            else if (mediaQueryDark.matches) activateDarkMode()
+            else {
+              const hour = new Date().getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            mediaQueryDark.addEventListener('change', () => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else {
+            theme === 'light' ? activateLightMode() : activateDarkMode()
+          }
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":true,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '在RISC-V上安装并使用LazyVim',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">66</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">27</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">12</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/top_img.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">TroyMitchell's blog</span></a><a class="nav-page-title" href="/"><span class="site-name">在RISC-V上安装并使用LazyVim</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">在RISC-V上安装并使用LazyVim</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-04-20T09:09:46.000Z" title="发表于 2026-04-20 17:09:46">2026-04-20</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-04-20T09:10:52.543Z" title="更新于 2026-04-20 17:10:52">2026-04-20</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>LazyVim 是基于 lazy.nvim 的 Neovim 预配置发行版，提供了开箱即用的现代编辑器体验。然而，lazy.nvim 强制要求 Neovim 必须使用 LuaJIT 构建，而官方 LuaJIT 并不支持 RISC-V 架构。</p>
+<p>本文记录了在 RISC-V Linux 环境（Ubuntu&#x2F;Debian）上，从零开始编译安装 Neovim + LazyVim 的完整流程，包括所有踩坑和解决方案。</p>
+<p>测试环境：</p>
+<ul>
+<li>架构：riscv64gc</li>
+<li>系统：Ubuntu (bianbu&#x2F;resolute)</li>
+<li>板卡：K3 开发板</li>
+</ul>
+<hr>
+<h2 id="1-编译安装-RISC-V-LuaJIT"><a href="#1-编译安装-RISC-V-LuaJIT" class="headerlink" title="1. 编译安装 RISC-V LuaJIT"></a>1. 编译安装 RISC-V LuaJIT</h2><p>官方 LuaJIT 不支持 RISC-V，但社区有一个活跃的移植分支：<a target="_blank" rel="noopener" href="https://github.com/IgnotaYun/LuaJIT">IgnotaYun&#x2F;LuaJIT</a>（<code>riscv</code> 分支）。该项目持续维护，CI 全绿，可用于生产。</p>
+<h3 id="1-1-安装编译依赖"><a href="#1-1-安装编译依赖" class="headerlink" title="1.1 安装编译依赖"></a>1.1 安装编译依赖</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install -y \</span><br><span class="line">  build-essential \</span><br><span class="line">  git</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-编译-LuaJIT"><a href="#1-2-编译-LuaJIT" class="headerlink" title="1.2 编译 LuaJIT"></a>1.2 编译 LuaJIT</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">clone</span> -b riscv https://github.com/IgnotaYun/LuaJIT.git ~/luajit-riscv</span><br><span class="line"><span class="built_in">cd</span> ~/luajit-riscv</span><br><span class="line">make -j$(<span class="built_in">nproc</span>)</span><br><span class="line"><span class="built_in">sudo</span> make install</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-3-配置动态链接"><a href="#1-3-配置动态链接" class="headerlink" title="1.3 配置动态链接"></a>1.3 配置动态链接</h3><p>如果 LuaJIT 安装到了 <code>/usr/local/lib</code>，需要让系统链接器能找到它：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;/usr/local/lib&quot;</span> | <span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/ld.so.conf.d/luajit.conf</span><br><span class="line"><span class="built_in">sudo</span> ldconfig</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-4-验证"><a href="#1-4-验证" class="headerlink" title="1.4 验证"></a>1.4 验证</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">luajit -v</span><br><span class="line"><span class="comment"># 应输出类似：LuaJIT 2.1.xxxxxxxxxx -- Copyright (C) 2005-2025 Mike Pall. https://luajit.org/</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="2-编译安装-Neovim"><a href="#2-编译安装-Neovim" class="headerlink" title="2. 编译安装 Neovim"></a>2. 编译安装 Neovim</h2><h3 id="2-1-安装编译依赖"><a href="#2-1-安装编译依赖" class="headerlink" title="2.1 安装编译依赖"></a>2.1 安装编译依赖</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install -y \</span><br><span class="line">  ninja-build \</span><br><span class="line">  gettext \</span><br><span class="line">  libtool \</span><br><span class="line">  libtool-bin \</span><br><span class="line">  autoconf \</span><br><span class="line">  automake \</span><br><span class="line">  cmake \</span><br><span class="line">  g++ \</span><br><span class="line">  pkg-config \</span><br><span class="line">  unzip \</span><br><span class="line">  curl \</span><br><span class="line">  git</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-获取源码"><a href="#2-2-获取源码" class="headerlink" title="2.2 获取源码"></a>2.2 获取源码</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/neovim/neovim.git ~/neovim</span><br><span class="line"><span class="built_in">cd</span> ~/neovim</span><br><span class="line">git checkout stable  <span class="comment"># 或指定 tag，如 v0.12.1</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-编译第三方依赖"><a href="#2-3-编译第三方依赖" class="headerlink" title="2.3 编译第三方依赖"></a>2.3 编译第三方依赖</h3><p>关键：使用 <code>-DUSE_BUNDLED_LUAJIT=OFF</code> 跳过 Neovim 自带的 LuaJIT 下载，改用系统安装的 RISC-V LuaJIT。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cmake -S cmake.deps -B .deps \</span><br><span class="line">  -DUSE_BUNDLED_LUAJIT=OFF</span><br><span class="line"></span><br><span class="line">cmake --build .deps -j$(<span class="built_in">nproc</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-编译-Neovim-本体"><a href="#2-4-编译-Neovim-本体" class="headerlink" title="2.4 编译 Neovim 本体"></a>2.4 编译 Neovim 本体</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cmake -S . -B build \</span><br><span class="line">  -DCMAKE_BUILD_TYPE=Release</span><br><span class="line"></span><br><span class="line">cmake --build build -j$(<span class="built_in">nproc</span>)</span><br></pre></td></tr></table></figure>
+
+<p>如果 cmake 找不到系统 LuaJIT，手动指定路径：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cmake -S . -B build \</span><br><span class="line">  -DCMAKE_BUILD_TYPE=Release \</span><br><span class="line">  -DLUAJIT_INCLUDE_DIR=/usr/local/include/luajit-2.1 \</span><br><span class="line">  -DLUAJIT_LIBRARY=/usr/local/lib/libluajit-5.1.so</span><br></pre></td></tr></table></figure>
+
+<p>可以用以下命令确认路径：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">find /usr -name <span class="string">&quot;luajit.h&quot;</span> 2&gt;/dev/null</span><br><span class="line">find /usr -name <span class="string">&quot;libluajit*&quot;</span> 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-5-安装"><a href="#2-5-安装" class="headerlink" title="2.5 安装"></a>2.5 安装</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> cmake --install build</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-6-验证"><a href="#2-6-验证" class="headerlink" title="2.6 验证"></a>2.6 验证</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nvim --version</span><br></pre></td></tr></table></figure>
+
+<p>输出中应包含 <code>LuaJIT 2.1.xxx</code> 字样，说明 Neovim 已正确链接 RISC-V LuaJIT。</p>
+<hr>
+<h2 id="3-安装-LazyVim"><a href="#3-安装-LazyVim" class="headerlink" title="3. 安装 LazyVim"></a>3. 安装 LazyVim</h2><p>参考官方文档：<a target="_blank" rel="noopener" href="https://www.lazyvim.org/installation">https://www.lazyvim.org/installation</a></p>
+<h3 id="3-1-备份已有配置（如有）"><a href="#3-1-备份已有配置（如有）" class="headerlink" title="3.1 备份已有配置（如有）"></a>3.1 备份已有配置（如有）</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">mv</span> ~/.config/nvim&#123;,.bak&#125;</span><br><span class="line"><span class="built_in">mv</span> ~/.local/share/nvim&#123;,.bak&#125;</span><br><span class="line"><span class="built_in">mv</span> ~/.local/state/nvim&#123;,.bak&#125;</span><br><span class="line"><span class="built_in">mv</span> ~/.cache/nvim&#123;,.bak&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-克隆-LazyVim-Starter"><a href="#3-2-克隆-LazyVim-Starter" class="headerlink" title="3.2 克隆 LazyVim Starter"></a>3.2 克隆 LazyVim Starter</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/LazyVim/starter ~/.config/nvim</span><br><span class="line"><span class="built_in">rm</span> -rf ~/.config/nvim/.git</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-启动-Neovim"><a href="#3-3-启动-Neovim" class="headerlink" title="3.3 启动 Neovim"></a>3.3 启动 Neovim</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nvim</span><br></pre></td></tr></table></figure>
+
+<p>首次启动时 lazy.nvim 会自动下载并安装所有插件。</p>
+<hr>
+<h2 id="4-解决-tree-sitter-cli-缺失问题"><a href="#4-解决-tree-sitter-cli-缺失问题" class="headerlink" title="4. 解决 tree-sitter-cli 缺失问题"></a>4. 解决 tree-sitter-cli 缺失问题</h2><h3 id="4-1-问题现象"><a href="#4-1-问题现象" class="headerlink" title="4.1 问题现象"></a>4.1 问题现象</h3><p>启动 nvim 后，nvim-treesitter 报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">❌ tree-sitter (CLI)</span><br><span class="line">Failed to install tree-sitter-cli with mason</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-原因"><a href="#4-2-原因" class="headerlink" title="4.2 原因"></a>4.2 原因</h3><p>tree-sitter-cli 通过 Mason 安装时会下载预编译二进制，但官方没有提供 RISC-V 架构的预编译包。</p>
+<h3 id="4-3-解决方案：通过-Rust-cargo-从源码编译"><a href="#4-3-解决方案：通过-Rust-cargo-从源码编译" class="headerlink" title="4.3 解决方案：通过 Rust&#x2F;cargo 从源码编译"></a>4.3 解决方案：通过 Rust&#x2F;cargo 从源码编译</h3><p>首先安装 Rust（如果还没有）：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl --proto <span class="string">&#x27;=https&#x27;</span> --tlsv1.2 -sSf https://sh.rustup.rs | sh</span><br><span class="line"><span class="built_in">source</span> ~/.cargo/env</span><br></pre></td></tr></table></figure>
+
+<p>在 RISC-V 上，Rust 的 bindgen 会遇到 clang target triple 不匹配的问题，需要安装依赖并设置环境变量：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install -y libclang-dev clang llvm</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 加入 ~/.zshrc 或 ~/.bashrc，以后所有 cargo build 都需要</span></span><br><span class="line"><span class="built_in">export</span> BINDGEN_EXTRA_CLANG_ARGS=<span class="string">&quot;--target=riscv64-linux-gnu -I/usr/include -I/usr/include/riscv64-linux-gnu&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后编译安装：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cargo install tree-sitter-cli</span><br></pre></td></tr></table></figure>
+
+<p>验证：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">tree-sitter --version</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="5-解决-lua-ls-Lua-Language-Server-安装失败"><a href="#5-解决-lua-ls-Lua-Language-Server-安装失败" class="headerlink" title="5. 解决 lua_ls (Lua Language Server) 安装失败"></a>5. 解决 lua_ls (Lua Language Server) 安装失败</h2><h3 id="5-1-问题现象"><a href="#5-1-问题现象" class="headerlink" title="5.1 问题现象"></a>5.1 问题现象</h3><p>Mason 报错无法安装 lua_ls。</p>
+<h3 id="5-2-原因"><a href="#5-2-原因" class="headerlink" title="5.2 原因"></a>5.2 原因</h3><p>与 tree-sitter-cli 相同，Mason 下载预编译二进制，没有 RISC-V 版本。</p>
+<h3 id="5-3-解决方案：从源码编译-lua-ls"><a href="#5-3-解决方案：从源码编译-lua-ls" class="headerlink" title="5.3 解决方案：从源码编译 lua_ls"></a>5.3 解决方案：从源码编译 lua_ls</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~</span><br><span class="line">git <span class="built_in">clone</span> --recurse-submodules https://github.com/LuaLS/lua-language-server.git</span><br><span class="line"><span class="built_in">cd</span> lua-language-server</span><br><span class="line">./make.sh</span><br></pre></td></tr></table></figure>
+
+<p>将编译产物加入 PATH：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;export PATH=&quot;$HOME/lua-language-server/bin:$PATH&quot;&#x27;</span> &gt;&gt; ~/.zshrc</span><br><span class="line"><span class="built_in">source</span> ~/.zshrc</span><br></pre></td></tr></table></figure>
+
+<p>然后在 LazyVim 配置中告诉 nvim-lspconfig 不要通过 Mason 管理 lua_ls：</p>
+<figure class="highlight lua"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ~/.config/nvim/lua/plugins/lsp.lua</span></span><br><span class="line"><span class="keyword">return</span> &#123;</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="string">&quot;neovim/nvim-lspconfig&quot;</span>,</span><br><span class="line">    opts = &#123;</span><br><span class="line">      servers = &#123;</span><br><span class="line">        lua_ls = &#123;</span><br><span class="line">          mason = <span class="literal">false</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="6-解决-blink-cmp-报错"><a href="#6-解决-blink-cmp-报错" class="headerlink" title="6. 解决 blink.cmp 报错"></a>6. 解决 blink.cmp 报错</h2><h3 id="6-1-问题现象"><a href="#6-1-问题现象" class="headerlink" title="6.1 问题现象"></a>6.1 问题现象</h3><p>启动 nvim 时报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">blink.cmp  ENOENT: no such file or directory: ...</span><br><span class="line">blink.cmp  Falling back to Lua implementation due to error while downloading pre-built binary</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-2-原因"><a href="#6-2-原因" class="headerlink" title="6.2 原因"></a>6.2 原因</h3><p>blink.cmp 是 LazyVim 默认的补全插件，它包含一个用 Rust 编写的高性能 fuzzy matching 库。插件启动时会尝试下载预编译的 <code>.so</code> 文件，但没有 RISC-V 版本，因此报错并 fallback 到纯 Lua 实现。</p>
+<h3 id="6-3-解决方案：在本机编译-blink-cmp-的-Rust-原生库"><a href="#6-3-解决方案：在本机编译-blink-cmp-的-Rust-原生库" class="headerlink" title="6.3 解决方案：在本机编译 blink.cmp 的 Rust 原生库"></a>6.3 解决方案：在本机编译 blink.cmp 的 Rust 原生库</h3><p>进入插件目录：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/.local/share/nvim/lazy/blink.cmp</span><br></pre></td></tr></table></figure>
+
+<p>编译：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cargo build --release</span><br></pre></td></tr></table></figure>
+
+<p>编译完成后，产物位于 <code>target/release/libblink_cmp_fuzzy.so</code>。blink.cmp 的 Lua 加载代码会自动在 <code>&lt;插件根目录&gt;/target/release/</code> 下搜索该文件，无需手动移动。</p>
+<p>验证产物存在：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">ls</span> target/release/libblink_cmp_fuzzy.so</span><br></pre></td></tr></table></figure>
+
+<p>然后在 LazyVim 配置中禁用预编译下载(可省略, 如果还报错就执行该步骤)：</p>
+<figure class="highlight lua"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ~/.config/nvim/lua/plugins/blink.lua</span></span><br><span class="line"><span class="keyword">return</span> &#123;</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="string">&quot;saghen/blink.cmp&quot;</span>,</span><br><span class="line">    opts = &#123;</span><br><span class="line">      fuzzy = &#123;</span><br><span class="line">        prebuilt_binaries = &#123;</span><br><span class="line">          download = <span class="literal">false</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>重启 nvim，blink.cmp 将使用本地编译的原生 Rust 库。</p>
+<blockquote>
+<p><strong>注意：</strong> 每次 blink.cmp 插件更新后，可能需要重新执行 <code>cargo build --release</code>，因为 Rust 源码可能有变更。</p>
+</blockquote>
+<hr>
+<h2 id="7-解决-snacks-nvim-indent-scope-报错"><a href="#7-解决-snacks-nvim-indent-scope-报错" class="headerlink" title="7. 解决 snacks.nvim indent&#x2F;scope 报错"></a>7. 解决 snacks.nvim indent&#x2F;scope 报错</h2><h3 id="7-1-问题现象"><a href="#7-1-问题现象" class="headerlink" title="7.1 问题现象"></a>7.1 问题现象</h3><p>用 nvim 打开 Lua 文件（或其他文件）时报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Error in BufReadPost Autocommands for &quot;*&quot;:</span><br><span class="line">Lua callback: ...snacks.nvim/lua/snacks/scope.lua:136: attempt to index local &#x27;self&#x27; (a nil value)</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-2-原因"><a href="#7-2-原因" class="headerlink" title="7.2 原因"></a>7.2 原因</h3><p>尚不确定是 snacks.nvim 本身的 bug 还是 RISC-V LuaJIT 实现的兼容性问题。</p>
+<p>推测是后者：<code>snacks/scope.lua</code> 在第 136 行使用了 <code>__eq</code> metamethod 比较两个 scope 对象。在标准 LuaJIT 中，当比较对象之一为 <code>nil</code> 时，<code>__eq</code> 不应被触发（Lua 规范规定只有两个操作数类型相同且都有 <code>__eq</code> 时才调用元方法）。但 IgnotaYun 的 RISC-V LuaJIT 分支可能在 <code>__eq</code> 的 JIT 编译路径上存在细微行为差异，导致 <code>nil</code> 值意外进入了元方法调用，从而触发 <code>attempt to index local &#39;self&#39; (a nil value)</code> 错误。</p>
+<h3 id="7-3-解决方案：禁用-snacks-nvim-的-indent-功能"><a href="#7-3-解决方案：禁用-snacks-nvim-的-indent-功能" class="headerlink" title="7.3 解决方案：禁用 snacks.nvim 的 indent 功能"></a>7.3 解决方案：禁用 snacks.nvim 的 indent 功能</h3><figure class="highlight lua"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- ~/.config/nvim/lua/plugins/snacks.lua</span></span><br><span class="line"><span class="keyword">return</span> &#123;</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="string">&quot;folke/snacks.nvim&quot;</span>,</span><br><span class="line">    opts = &#123;</span><br><span class="line">      indent = &#123; enabled = <span class="literal">false</span> &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>影响：失去缩进参考线和当前代码块 scope 高亮。这是纯视觉功能，不影响编辑、LSP、补全、treesitter 等核心功能。</p>
+<hr>
+<h2 id="8-总结"><a href="#8-总结" class="headerlink" title="8. 总结"></a>8. 总结</h2><table>
+<thead>
+<tr>
+<th>组件</th>
+<th>问题</th>
+<th>解决方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LuaJIT</td>
+<td>官方不支持 RISC-V</td>
+<td>使用 IgnotaYun&#x2F;LuaJIT riscv 分支</td>
+</tr>
+<tr>
+<td>Neovim</td>
+<td>默认拉取不支持 RV 的 LuaJIT</td>
+<td><code>-DUSE_BUNDLED_LUAJIT=OFF</code> 使用系统 LuaJIT</td>
+</tr>
+<tr>
+<td>tree-sitter-cli</td>
+<td>无预编译包</td>
+<td><code>cargo install tree-sitter-cli</code></td>
+</tr>
+<tr>
+<td>lua_ls</td>
+<td>Mason 无预编译包</td>
+<td>源码编译 + <code>mason = false</code></td>
+</tr>
+<tr>
+<td>blink.cmp</td>
+<td>无预编译 .so</td>
+<td>插件目录内 <code>cargo build --release</code></td>
+</tr>
+<tr>
+<td>snacks.nvim</td>
+<td>indent&#x2F;scope 触发 LuaJIT __eq 异常</td>
+<td>配置 <code>indent = &#123; enabled = false &#125;</code></td>
+</tr>
+</tbody></table>
+<h3 id="建议写入-shell-配置的环境变量"><a href="#建议写入-shell-配置的环境变量" class="headerlink" title="建议写入 shell 配置的环境变量"></a>建议写入 shell 配置的环境变量</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># ~/.zshrc 或 ~/.bashrc</span></span><br><span class="line"><span class="built_in">export</span> BINDGEN_EXTRA_CLANG_ARGS=<span class="string">&quot;--target=riscv64-linux-gnu -I/usr/include -I/usr/include/riscv64-linux-gnu&quot;</span></span><br><span class="line"><span class="built_in">export</span> PATH=<span class="string">&quot;<span class="variable">$HOME</span>/lua-language-server/bin:<span class="variable">$PATH</span>&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>完成以上步骤后，你将在 RISC-V 上拥有一个功能完整的 LazyVim 开发环境。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://blog.troy-y.org">TroyMitchell</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.troy-y.org/2026/04/20/%E5%9C%A8RISC-V%E4%B8%8A%E5%AE%89%E8%A3%85%E5%B9%B6%E4%BD%BF%E7%94%A8LazyVim/">https://blog.troy-y.org/2026/04/20/%E5%9C%A8RISC-V%E4%B8%8A%E5%AE%89%E8%A3%85%E5%B9%B6%E4%BD%BF%E7%94%A8LazyVim/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.troy-y.org" target="_blank">TroyMitchell's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/RISC-V/">RISC-V</a><a class="post-meta__tags" href="/tags/Neovim/">Neovim</a><a class="post-meta__tags" href="/tags/LazyVim/">LazyVim</a><a class="post-meta__tags" href="/tags/LuaJIT/">LuaJIT</a></div><div class="post-share"><div class="social-share" data-image="https://avatars.githubusercontent.com/u/133468432?v=4" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i>Buy me a coffee</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wxzsm.jpg" target="_blank"><img class="post-qr-code-img" src="/img/wxzsm.jpg"/></a><div class="post-qr-code-desc"></div></li></ul></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/09/16/openmpi-0-openmpi-img-parse/" title="openmpi[0]-openmpi-img-parse"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">openmpi[0]-openmpi-img-parse</div></div><div class="info-2"><div class="info-item-1">      openmpi[0]-openmpi-img-parseopenmpi[1] 什么是openmpiopenmpi[2] 模块化组件架构openmpi[3] btl框架的self组件分析  总览Open MPI（Open 对称多处理器接口）是一个开源、高性能的 MPI（消息传递接口）实现。 核心概念解释：  MPI (Message Passing Interface)：MPI 不是一个编程语言，而是一个标准或规范。它定义了一套用于并行计算的函数库，允许不同的进程（通常运行在不同的处理器或计算节点上）通过显式地发送和接收消息来相互通信和协作。你可以把它想象成一套并行程序之间进行交流的“语言规则”。 并行计算：指将一个大的计算任务分解成许多小任务，这些小任务可以同时（并行地）在多个处理器上执行，以缩短完成整个任务所需的时间。 实现 (Implementation)：MPI 本身只是一个标准，具体的编程库需要由不同的组织或公司去“实现”。Open MPI 就是众多 MPI 实现中的一个，其他著名的实现包括 MPICH、Intel MPI 等。  简而言之，Open MPI ...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://avatars.githubusercontent.com/u/133468432?v=4" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">TroyMitchell</div><div class="author-info-description">对弈平凡</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">66</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">27</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">12</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/TroyMitchell911"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">Words are cheap, I do.</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content is-expand"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85-RISC-V-LuaJIT"><span class="toc-number">2.</span> <span class="toc-text">1. 编译安装 RISC-V LuaJIT</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E5%AE%89%E8%A3%85%E7%BC%96%E8%AF%91%E4%BE%9D%E8%B5%96"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 安装编译依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E7%BC%96%E8%AF%91-LuaJIT"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 编译 LuaJIT</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E9%85%8D%E7%BD%AE%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5"><span class="toc-number">2.3.</span> <span class="toc-text">1.3 配置动态链接</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-%E9%AA%8C%E8%AF%81"><span class="toc-number">2.4.</span> <span class="toc-text">1.4 验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85-Neovim"><span class="toc-number">3.</span> <span class="toc-text">2. 编译安装 Neovim</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%AE%89%E8%A3%85%E7%BC%96%E8%AF%91%E4%BE%9D%E8%B5%96"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 安装编译依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E8%8E%B7%E5%8F%96%E6%BA%90%E7%A0%81"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 获取源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E7%BC%96%E8%AF%91%E7%AC%AC%E4%B8%89%E6%96%B9%E4%BE%9D%E8%B5%96"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 编译第三方依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E7%BC%96%E8%AF%91-Neovim-%E6%9C%AC%E4%BD%93"><span class="toc-number">3.4.</span> <span class="toc-text">2.4 编译 Neovim 本体</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-%E5%AE%89%E8%A3%85"><span class="toc-number">3.5.</span> <span class="toc-text">2.5 安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-%E9%AA%8C%E8%AF%81"><span class="toc-number">3.6.</span> <span class="toc-text">2.6 验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%AE%89%E8%A3%85-LazyVim"><span class="toc-number">4.</span> <span class="toc-text">3. 安装 LazyVim</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%A4%87%E4%BB%BD%E5%B7%B2%E6%9C%89%E9%85%8D%E7%BD%AE%EF%BC%88%E5%A6%82%E6%9C%89%EF%BC%89"><span class="toc-number">4.1.</span> <span class="toc-text">3.1 备份已有配置（如有）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%85%8B%E9%9A%86-LazyVim-Starter"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 克隆 LazyVim Starter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%90%AF%E5%8A%A8-Neovim"><span class="toc-number">4.3.</span> <span class="toc-text">3.3 启动 Neovim</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E8%A7%A3%E5%86%B3-tree-sitter-cli-%E7%BC%BA%E5%A4%B1%E9%97%AE%E9%A2%98"><span class="toc-number">5.</span> <span class="toc-text">4. 解决 tree-sitter-cli 缺失问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E9%97%AE%E9%A2%98%E7%8E%B0%E8%B1%A1"><span class="toc-number">5.1.</span> <span class="toc-text">4.1 问题现象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E5%8E%9F%E5%9B%A0"><span class="toc-number">5.2.</span> <span class="toc-text">4.2 原因</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%EF%BC%9A%E9%80%9A%E8%BF%87-Rust-cargo-%E4%BB%8E%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91"><span class="toc-number">5.3.</span> <span class="toc-text">4.3 解决方案：通过 Rust&#x2F;cargo 从源码编译</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E8%A7%A3%E5%86%B3-lua-ls-Lua-Language-Server-%E5%AE%89%E8%A3%85%E5%A4%B1%E8%B4%A5"><span class="toc-number">6.</span> <span class="toc-text">5. 解决 lua_ls (Lua Language Server) 安装失败</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E9%97%AE%E9%A2%98%E7%8E%B0%E8%B1%A1"><span class="toc-number">6.1.</span> <span class="toc-text">5.1 问题现象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E5%8E%9F%E5%9B%A0"><span class="toc-number">6.2.</span> <span class="toc-text">5.2 原因</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%EF%BC%9A%E4%BB%8E%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91-lua-ls"><span class="toc-number">6.3.</span> <span class="toc-text">5.3 解决方案：从源码编译 lua_ls</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E8%A7%A3%E5%86%B3-blink-cmp-%E6%8A%A5%E9%94%99"><span class="toc-number">7.</span> <span class="toc-text">6. 解决 blink.cmp 报错</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E9%97%AE%E9%A2%98%E7%8E%B0%E8%B1%A1"><span class="toc-number">7.1.</span> <span class="toc-text">6.1 问题现象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E5%8E%9F%E5%9B%A0"><span class="toc-number">7.2.</span> <span class="toc-text">6.2 原因</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%EF%BC%9A%E5%9C%A8%E6%9C%AC%E6%9C%BA%E7%BC%96%E8%AF%91-blink-cmp-%E7%9A%84-Rust-%E5%8E%9F%E7%94%9F%E5%BA%93"><span class="toc-number">7.3.</span> <span class="toc-text">6.3 解决方案：在本机编译 blink.cmp 的 Rust 原生库</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E8%A7%A3%E5%86%B3-snacks-nvim-indent-scope-%E6%8A%A5%E9%94%99"><span class="toc-number">8.</span> <span class="toc-text">7. 解决 snacks.nvim indent&#x2F;scope 报错</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-%E9%97%AE%E9%A2%98%E7%8E%B0%E8%B1%A1"><span class="toc-number">8.1.</span> <span class="toc-text">7.1 问题现象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-%E5%8E%9F%E5%9B%A0"><span class="toc-number">8.2.</span> <span class="toc-text">7.2 原因</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%EF%BC%9A%E7%A6%81%E7%94%A8-snacks-nvim-%E7%9A%84-indent-%E5%8A%9F%E8%83%BD"><span class="toc-number">8.3.</span> <span class="toc-text">7.3 解决方案：禁用 snacks.nvim 的 indent 功能</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-%E6%80%BB%E7%BB%93"><span class="toc-number">9.</span> <span class="toc-text">8. 总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BB%BA%E8%AE%AE%E5%86%99%E5%85%A5-shell-%E9%85%8D%E7%BD%AE%E7%9A%84%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">9.1.</span> <span class="toc-text">建议写入 shell 配置的环境变量</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/20/%E5%9C%A8RISC-V%E4%B8%8A%E5%AE%89%E8%A3%85%E5%B9%B6%E4%BD%BF%E7%94%A8LazyVim/" title="在RISC-V上安装并使用LazyVim">在RISC-V上安装并使用LazyVim</a><time datetime="2026-04-20T09:09:46.000Z" title="发表于 2026-04-20 17:09:46">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/16/openmpi-0-openmpi-img-parse/" title="openmpi[0]-openmpi-img-parse">openmpi[0]-openmpi-img-parse</a><time datetime="2025-09-16T09:25:23.000Z" title="发表于 2025-09-16 17:25:23">2025-09-16</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/08/openmpi-3-btl-mca-self/" title="openmpi[3] btl框架的self组件分析">openmpi[3] btl框架的self组件分析</a><time datetime="2025-09-08T09:44:55.000Z" title="发表于 2025-09-08 17:44:55">2025-09-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/08/openmpi-2-modular-component-architecture/" title="openmpi[2] 模块化组件架构">openmpi[2] 模块化组件架构</a><time datetime="2025-09-08T07:49:21.000Z" title="发表于 2025-09-08 15:49:21">2025-09-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/09/08/openmpi-1-what-is-openmpi/" title="openmpi[1] 什么是openmpi">openmpi[1] 什么是openmpi</a><time datetime="2025-09-08T01:57:36.000Z" title="发表于 2025-09-08 09:57:36">2025-09-08</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2020 - 2026 By TroyMitchell</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.4.3"></script><script src="/js/main.js?v=5.4.3"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/canvas-nest.min.js"></script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.4/dist/click-heart.min.js" async="async" mobile="true"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.4.3"></script></div></div></body></html>
